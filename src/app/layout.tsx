@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import Link from "next/link";
+import TemporaryButton from "@/components/TemporaryButton";
+import { UIContextProvider } from "@/context/UIProvider";
+import AddNewFieldModal from "@/components/AddNewFieldModal";
+import { TaskContextProvider } from "@/context/TaskProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,13 +21,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} flex gap-4`}>
-        <header className="w-[340px] h-svh">
-          <nav>
+      <body className={`${inter.className} text-stone-950 dark:text-stone-300 flex gap-4`}>
+        <TaskContextProvider>
+          <header className="w-[340px] h-svh">
+            <nav className="h-full flex flex-col justify-between">
+              <Link href={'/tasks'}>taks</Link>
 
-          </nav>
-        </header>
-        {children}
+              <TemporaryButton />
+            </nav>
+          </header>
+
+          {children}
+
+          {/* <AddNewFieldModal /> */}
+        </TaskContextProvider>
       </body>
     </html>
   );
