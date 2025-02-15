@@ -8,10 +8,15 @@ type TaskState = {
     rows: RowType[]
     addNewField: (name: string, type: string) => void
     removeColumn: (columnId: string) => void
+    editTask: ({ id, fieldName, value }: {
+        id: number;
+        fieldName: string;
+        value: string;
+    }) => void
     ProtectedFields: {
-        Title: string;
-        Status: string;
-        Priority: string;
+        title: string;
+        status: string;
+        priority: string;
     }
 }
 
@@ -20,16 +25,16 @@ const initialState: TaskState = {
     rows: [],
     addNewField: () => { },
     removeColumn: (columnId: string) => { },
-    ProtectedFields: { Title: 'Title', Status: 'Status', Priority: 'Priority' }
+    editTask: () => { },
+    ProtectedFields: { title: 'title', status: 'status', priority: 'priority' }
 }
 
 const TaskContext = createContext<TaskState>(initialState)
 
 export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
-    const ProtectedFields = { Title: 'Title', Status: 'Status', Priority: 'Priority' }
+    const ProtectedFields = { title: 'title', status: 'status', priority: 'priority' }
 
     const [columns, setColumns] = useState<ColumnType[]>([])
-
     const [rows, setRows] = useState<RowType[]>([])
 
     const addColumnToRows = (columnId: string) => {
@@ -56,23 +61,46 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
         }))
     }
 
-
     const addNewField = (name: string, type: string) => {
         addColumn(name, type)
         addColumnToRows(name)
     }
 
-    useEffect(() => {
-        setColumns([
-            { name: "Title", type: 'text' },
-            { name: "Status", type: 'text' },
-            { name: "Priority", type: 'text' }
-        ])
+    function fetchTasks(limit = 10, page = 1) {
+        let tasks = JSON.parse(localStorage.getItem('tasks') || '')
 
-        setRows([
-            { Title: "Complete setup", Status: "In Progress", Priority: "High" },
-            { Title: "Add dark theme", Status: "Not Started", Priority: "Medium" }
-        ])
+        if (tasks && tasks.length > 1) {
+            tasks = tasks.slice(limit * (page - 1), limit * page)
+
+            console.log({ tasks })
+            setRows(tasks)
+
+            setColumns([
+                { name: "title", type: 'text' },
+                { name: "status", type: 'text' },
+                { name: "priority", type: 'text' }
+            ])
+        }
+    }
+
+    const editTask = ({ id, fieldName, value }: { id: number, fieldName: string, value: string }) => {
+        const tasks: RowType[] = JSON.parse(localStorage.getItem('tasks') || '')
+
+        const updatedTasks = tasks.map(task => {
+            if (task.id === id) {
+                return { ...task, [fieldName]: value }
+            }
+
+            return task
+        })
+
+        console.log({ updatedTasks })
+
+        localStorage.setItem('tasks', JSON.stringify(updatedTasks))
+    }
+
+    useEffect(() => {
+        fetchTasks()
     }, [])
 
     return (
@@ -81,6 +109,7 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
             rows,
             addNewField,
             removeColumn,
+            editTask,
             ProtectedFields
         }}
         >

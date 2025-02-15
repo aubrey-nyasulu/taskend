@@ -1,11 +1,12 @@
 "use client"
 
-import { useContext, useEffect, useState } from "react"
+import { ChangeEvent, FormEvent, useContext, useEffect, useRef, useState } from "react"
 import UIContext from "@/context/UIProvider"
 import AddNewFieldModal from "./AddNewFieldModal"
 import TaskContext from "@/context/TaskProvider"
 import clsx from "clsx"
 import FieldNameOptionsModal from "./FieldNameOptionsModal"
+import { RowType } from "@/types"
 
 function Table() {
     const [addNewFieldModalIsOpen, setAddNewFieldModalIsOpen] = useState(false)
@@ -15,7 +16,7 @@ function Table() {
     const { columns, rows, ProtectedFields } = useContext(TaskContext)
 
     return (
-        <div className="relative w-full max-w-4xl mx-auto overflow-hidden rounded-b-lg border">
+        <div className="relative w-full max-w-4xl mx-auto overflow-hidden rounded-b-lg ">
             <table className="w-full border-collapse">
                 {/* Table Header */}
                 <thead>
@@ -27,7 +28,8 @@ function Table() {
                                     className={clsx(
                                         "px-4 py-3 border-b cursor-context-menu",
                                         {
-                                            "cursor-not-allowed": name in ProtectedFields
+                                            "cursor-not-allowed": name in ProtectedFields,
+                                            "cursor-pointer": !(name in ProtectedFields),
                                         }
                                     )}
                                     onClick={(e) => {
@@ -69,19 +71,26 @@ function Table() {
                     {rows.map((row, index) => (
                         <tr
                             key={index}
-                            className="hover:bg-gray-50"
+                            className="hover:bg-gray-50 cursor-pointer"
                         >
                             {
                                 columns.map(({ name }) => (
                                     <td
                                         key={index + name}
-                                        className="px-4 py-3 border-b"
+                                        className={clsx("px-4 border-b")}
                                     >
-                                        {row[name]}
+                                        {
+                                            name === 'title'
+                                                ? <EditableCell
+                                                    {...{ id: row.id, value: row[name] as string, fieldName: name }}
+                                                />
+                                                : <>{row[name]}</>
+                                        }
                                     </td>
                                 ))
                             }
-                            <td className="px-4 py-3 border-b bg-stone-200"></td>
+
+                            <td className="px-4 py-3 border-b bg-stone-50"></td>
                         </tr>
                     ))}
                 </tbody>
@@ -99,3 +108,50 @@ function Table() {
 }
 
 export default Table
+
+type EditableCellPropTypes = { fieldName: string, value: string, id: number }
+
+const EditableCell = ({ id, value, fieldName }: EditableCellPropTypes) => {
+    const [inputValue, setInputValue] = useState('')
+
+    const { editTask } = useContext(TaskContext)
+
+    useEffect(() => {
+        setInputValue(value)
+    }, [])
+
+    const save = () => {
+        console.log({ inputValue })
+        editTask({ id, fieldName, value: inputValue })
+    }
+
+    useEffect(() => {
+        if (inputRef.current) {
+            inputRef.current.addEventListener('blur', save)
+        }
+
+        return () => inputRef.current?.removeEventListener('blur', save)
+    }, [inputValue])
+
+    const handleInputChange = (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+
+        if (inputRef.current) {
+            inputRef.current.blur()
+        }
+    }
+
+    const inputRef = useRef<HTMLInputElement>(null)
+
+    return (
+        <form onSubmit={handleInputChange}>
+            <input
+                ref={inputRef}
+                type="text"
+                value={inputValue}
+                onChange={e => setInputValue(e.target.value)}
+                className="focus:bg-yellow-50 focus:shadow-md focus:pl-2 focus:rounded-lg focus:scale-110 h-full py-3 cursor-pointer focus:cursor-text"
+            />
+        </form>
+    )
+}

@@ -1,8 +1,9 @@
 export type RowType = {
     [index: string]: string | number
-    Title: string
-    Status: string
-    Priority: string
+    id: number
+    title: string
+    status: string
+    priority: string
 }
 
 export type ColumnType = {
