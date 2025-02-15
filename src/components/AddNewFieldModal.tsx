@@ -1,30 +1,22 @@
 "use client"
 
-import UIContext from "@/context/UIProvider"
-import { FormEvent, useContext } from "react"
-
-// export default function AddNewFieldModal() {
-//     const { addNewFieldmodalIsOpen } = useContext(UIContext)
-
-//     return (
-//         <div className={`absolute top-12 right-0 bg-stone-100 p-4 rounded-md ${addNewFieldmodalIsOpen ? 'block' : 'hidden'}`}>
-//             <p>one</p>
-//             <p>two</p>
-//             <p>three</p>
-//         </div>
-//     )
-// }
-
-
+import TaskContext from "@/context/TaskProvider"
+import { duplicateFielNameExists } from "@/lib/utils"
+import clsx from "clsx"
+import { ChangeEvent, FormEvent, useContext, useState } from "react"
 import { useEffect, useRef } from "react"
 
 interface NewFieldModalProps {
     isOpen: boolean
     onClose: () => void
-    onSave: (name: string, type: string) => void
 }
 
-export default function NewFieldModal({ isOpen, onClose, onSave }: NewFieldModalProps) {
+export default function NewFieldModal({ isOpen, onClose }: NewFieldModalProps) {
+    const [fieldName, setFieldName] = useState('')
+    const [fieldNameExist, setFieldNameExist] = useState<boolean | undefined>(true)
+
+    const { columns, addNewField } = useContext(TaskContext)
+
     const modalRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLInputElement>(null)
 
@@ -45,8 +37,19 @@ export default function NewFieldModal({ isOpen, onClose, onSave }: NewFieldModal
         if (!isOpen) return
 
         const focusableElements = modalRef.current?.querySelectorAll("input, button")
+
+        let lastFocusibleElementIndex = 0
+        if (focusableElements?.length) {
+            if (fieldNameExist) {
+                lastFocusibleElementIndex = focusableElements.length - 2
+            } else {
+                lastFocusibleElementIndex = focusableElements.length - 1
+            }
+
+        }
+
         const firstElement = focusableElements?.[0] as HTMLElement
-        const lastElement = focusableElements?.[focusableElements.length - 1] as HTMLElement
+        const lastElement = focusableElements?.[lastFocusibleElementIndex] as HTMLElement
 
         const handleTabKey = (e: KeyboardEvent) => {
             if (e.key === "Tab") {
@@ -62,13 +65,26 @@ export default function NewFieldModal({ isOpen, onClose, onSave }: NewFieldModal
 
         document.addEventListener("keydown", handleTabKey)
         return () => document.removeEventListener("keydown", handleTabKey)
-    }, [isOpen])
+    }, [isOpen, fieldNameExist])
 
     useEffect(() => {
         if (isOpen) inputRef.current?.focus()
     }, [isOpen])
 
     if (!isOpen) return null
+
+    const handleFieldNameChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value.trim()
+        setFieldName(value)
+
+        if (!value) {
+            setFieldNameExist(undefined)
+            return
+        }
+
+        const columnExist = duplicateFielNameExists({ columns, value })
+        setFieldNameExist(columnExist)
+    }
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -84,7 +100,7 @@ export default function NewFieldModal({ isOpen, onClose, onSave }: NewFieldModal
                     const type = formData.get('field-type') as string
 
                     if (name && type) {
-                        onSave(name, type)
+                        addNewField(name, type)
                         onClose()
                     }
                 }}>
@@ -96,6 +112,8 @@ export default function NewFieldModal({ isOpen, onClose, onSave }: NewFieldModal
                         name="name"
                         placeholder="Field name"
                         required
+                        value={fieldName}
+                        onChange={handleFieldNameChange}
                         className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-stone-500"
                     />
 
@@ -143,8 +161,14 @@ export default function NewFieldModal({ isOpen, onClose, onSave }: NewFieldModal
                             Cancel
                         </button>
                         <button
+                            arial-disabled={fieldNameExist}
                             type="submit"
-                            className="px-4 py-2 bg-stone-600 text-white rounded hover:bg-stone-700"
+                            className={clsx(
+                                'px-4 py-2 bg-stone-600 text-white rounded hover:bg-stone-700',
+                                {
+                                    'opacity-30 pointer-events-none': fieldNameExist
+                                }
+                            )}
                         >
                             Save
                         </button>

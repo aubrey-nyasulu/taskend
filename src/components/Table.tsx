@@ -9,7 +9,7 @@ import TaskContext from "@/context/TaskProvider"
 function Table() {
     const [isModalOpen, setIsModalOpen] = useState(false)
 
-    const { columns, rows, addNewField } = useContext(TaskContext)
+    const { columns, rows } = useContext(TaskContext)
 
     console.log({ columns, rows })
 
@@ -61,22 +61,10 @@ function Table() {
                             <td className="px-4 py-3 border-b bg-stone-200"></td>
                         </tr>
                     ))}
-                    {/* <tr className="hover:bg-gray-50">
-                        <td className="px-4 py-3 border-b">Design homepage UI</td>
-                        <td className="px-4 py-3 border-b">Completed</td>
-                        <td className="px-4 py-3 border-b">Medium</td>
-                        <td className="px-4 py-3 border-b bg-stone-200"></td>
-                    </tr>
-                    <tr className="hover:bg-gray-50">
-                        <td className="px-4 py-3 border-b">Write API documentation</td>
-                        <td className="px-4 py-3 border-b">Not Started</td>
-                        <td className="px-4 py-3 border-b">Low</td>
-                        <td className="px-4 py-3 border-b bg-stone-200"></td>
-                    </tr> */}
                 </tbody>
             </table>
 
-            <NewFieldModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={addNewField} />
+            <NewFieldModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
         </div >
     )
 }
