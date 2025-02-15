@@ -3,15 +3,16 @@
 import { useContext, useEffect, useState } from "react"
 import UIContext from "@/context/UIProvider"
 import AddNewFieldModal from "./AddNewFieldModal"
-import NewFieldModal from "./AddNewFieldModal"
 import TaskContext from "@/context/TaskProvider"
+import clsx from "clsx"
+import FieldNameOptionsModal from "./FieldNameOptionsModal"
 
 function Table() {
-    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [addNewFieldModalIsOpen, setAddNewFieldModalIsOpen] = useState(false)
+    const [deleFieldModalIsOpen, setDeleFieldModalIsOpen] = useState(false)
+    const [rightClickedField, setRightClickedField] = useState('')
 
-    const { columns, rows } = useContext(TaskContext)
-
-    console.log({ columns, rows })
+    const { columns, rows, ProtectedFields } = useContext(TaskContext)
 
     return (
         <div className="relative w-full max-w-4xl mx-auto overflow-hidden rounded-b-lg border">
@@ -23,7 +24,29 @@ function Table() {
                             columns.map(({ name }, index) => (
                                 <th
                                     key={name + index}
-                                    className="px-4 py-3 border-b"
+                                    className={clsx(
+                                        "px-4 py-3 border-b cursor-context-menu",
+                                        {
+                                            "cursor-not-allowed": name in ProtectedFields
+                                        }
+                                    )}
+                                    onClick={(e) => {
+                                        e.preventDefault()
+
+                                        if (name in ProtectedFields) return
+
+                                        setDeleFieldModalIsOpen(true)
+                                        setRightClickedField(name)
+                                    }}
+
+                                    onContextMenu={(e) => {
+                                        e.preventDefault()
+
+                                        if (name in ProtectedFields) return
+
+                                        setDeleFieldModalIsOpen(true)
+                                        setRightClickedField(name)
+                                    }}
                                 >
                                     {name}
                                 </th>
@@ -32,7 +55,7 @@ function Table() {
                         <th className="border-b">
                             <button
                                 // onClick={() => setAddNewFieldModalIsOpen(true)}
-                                onClick={() => setIsModalOpen(true)}
+                                onClick={() => setAddNewFieldModalIsOpen(true)}
                                 className="text-2xl font-bold w-full h-full focus:ring-1 focus:ring-stone-700"
                             >
                                 +
@@ -64,7 +87,13 @@ function Table() {
                 </tbody>
             </table>
 
-            <NewFieldModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+            <AddNewFieldModal isOpen={addNewFieldModalIsOpen} onClose={() => setAddNewFieldModalIsOpen(false)} />
+
+            <FieldNameOptionsModal
+                fieldName={rightClickedField}
+                isOpen={deleFieldModalIsOpen}
+                onClose={() => setDeleFieldModalIsOpen(false)}
+            />
         </div >
     )
 }

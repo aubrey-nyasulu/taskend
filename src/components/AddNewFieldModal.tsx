@@ -3,34 +3,23 @@
 import TaskContext from "@/context/TaskProvider"
 import { duplicateFielNameExists } from "@/lib/utils"
 import clsx from "clsx"
-import { ChangeEvent, FormEvent, useContext, useState } from "react"
+import { ChangeEvent, FormEvent, ReactNode, useContext, useState } from "react"
 import { useEffect, useRef } from "react"
+import ModalContainer from "./ModalContainer"
 
-interface NewFieldModalProps {
+type NewFieldModalProps = {
     isOpen: boolean
     onClose: () => void
 }
 
-export default function NewFieldModal({ isOpen, onClose }: NewFieldModalProps) {
+export default function AddNewFieldModal({ isOpen, onClose }: NewFieldModalProps) {
     const [fieldName, setFieldName] = useState('')
-    const [fieldNameExist, setFieldNameExist] = useState<boolean | undefined>(true)
+    const [fieldNameExist, setFieldNameExist] = useState<boolean>(false)
 
     const { columns, addNewField } = useContext(TaskContext)
 
     const modalRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLInputElement>(null)
-
-    // Close on Escape Key
-    useEffect(() => {
-        if (!isOpen) return
-
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape") onClose()
-        }
-
-        document.addEventListener("keydown", handleKeyDown)
-        return () => document.removeEventListener("keydown", handleKeyDown)
-    }, [isOpen, onClose])
 
     // Focus Trap inside Modal
     useEffect(() => {
@@ -78,7 +67,7 @@ export default function NewFieldModal({ isOpen, onClose }: NewFieldModalProps) {
         setFieldName(value)
 
         if (!value) {
-            setFieldNameExist(undefined)
+            setFieldNameExist(false)
             return
         }
 
@@ -87,10 +76,10 @@ export default function NewFieldModal({ isOpen, onClose }: NewFieldModalProps) {
     }
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="absolute inset-0" onClick={onClose}></div>
+        <ModalContainer {...{ isOpen, onClose }}>
+            <div ref={modalRef} className="relative bg-white p-6 rounded-lg shadow-lg z-50 w-96">
 
-            <div ref={modalRef} className="bg-white p-6 rounded-lg shadow-lg z-50 w-96 relative">
+
                 <form onSubmit={e => {
                     e.preventDefault()
 
@@ -102,9 +91,22 @@ export default function NewFieldModal({ isOpen, onClose }: NewFieldModalProps) {
                     if (name && type) {
                         addNewField(name, type)
                         onClose()
+                        setFieldName('')
                     }
                 }}>
-                    <h2 className="text-lg font-semibold mb-4">Add New Field</h2>
+                    <div className="w-full flex justify-between items-center mb-4">
+                        <h2 className="text-lg font-semibold">Add New Field</h2>
+
+                        <button
+                            onClick={(e) => {
+                                console.log(e)
+                                setFieldName('')
+                                onClose()
+                            }}
+                            className="text-lg font-semibold w-fit h-fit">
+                            X
+                        </button>
+                    </div>
 
                     <input
                         ref={inputRef}
@@ -157,11 +159,8 @@ export default function NewFieldModal({ isOpen, onClose }: NewFieldModalProps) {
                     </div>
 
                     <div className="mt-4 flex justify-end gap-2">
-                        <button onClick={onClose} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
-                            Cancel
-                        </button>
                         <button
-                            arial-disabled={fieldNameExist}
+                            arial-disabled={`${fieldNameExist}`}
                             type="submit"
                             className={clsx(
                                 'px-4 py-2 bg-stone-600 text-white rounded hover:bg-stone-700',
@@ -175,6 +174,8 @@ export default function NewFieldModal({ isOpen, onClose }: NewFieldModalProps) {
                     </div>
                 </form>
             </div>
-        </div>
+        </ModalContainer>
+
+
     )
 }

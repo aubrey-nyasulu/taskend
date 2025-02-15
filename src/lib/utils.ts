@@ -6,7 +6,7 @@ type DuplicateExistsParams = {
 }
 
 export const duplicateFielNameExists = ({ columns, value }: DuplicateExistsParams) => {
-    const fieldExist = columns.find(({ name }) => name === value)
+    const fieldExist = columns.find(({ name }) => name.toLowerCase() === value.toLowerCase())
 
     return !!fieldExist
 }
