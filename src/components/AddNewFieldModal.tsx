@@ -78,8 +78,6 @@ export default function AddNewFieldModal({ isOpen, onClose }: NewFieldModalProps
     return (
         <ModalContainer {...{ isOpen, onClose }}>
             <div ref={modalRef} className="relative bg-white p-6 rounded-lg shadow-lg z-50 w-96">
-
-
                 <form onSubmit={e => {
                     e.preventDefault()
 

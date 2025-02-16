@@ -150,7 +150,7 @@ const EditableCell = ({ id, value, fieldName }: EditableCellPropTypes) => {
                 type="text"
                 value={inputValue}
                 onChange={e => setInputValue(e.target.value)}
-                className="focus:bg-yellow-50 focus:shadow-md focus:pl-2 focus:rounded-lg focus:scale-110 h-full py-3 cursor-pointer focus:cursor-text"
+                className="focus:bg-stone-100 focus:shadow-md focus:pl-2 focus:rounded-lg focus:scale-110 h-full py-3 cursor-pointer focus:cursor-text"
             />
         </form>
     )
