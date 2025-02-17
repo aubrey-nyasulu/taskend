@@ -4,9 +4,9 @@ import UIContext from '@/context/UIProvider'
 import { useContext } from 'react'
 
 export default function ModalCloserBackground() {
-    const { setAddNewFieldModalIsOpen, addNewFieldmodalIsOpen } = useContext(UIContext)
+    const { setIsAddNewFieldModalOpen } = useContext(UIContext)
 
     return (
-        <div className="absolute inset-0" onClick={() => setAddNewFieldModalIsOpen(false)}></div>
+        <div className="absolute inset-0" onClick={() => setIsAddNewFieldModalOpen(false)}></div>
     )
 }

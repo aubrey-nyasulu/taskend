@@ -1,7 +1,7 @@
 import ModalCloserBackground from "@/components/ModalCloserBackground";
-import TemporaryComponent from "@/components/TemporaryComponent";
+import TaskManager from "@/components/TaskManager";
 
-export default function Home() {
+export default function TasksPage({ searchParams }: { searchParams: { page?: string } }) {
 
 
   return (
@@ -12,7 +12,7 @@ export default function Home() {
 
       <ModalCloserBackground />
 
-      <TemporaryComponent />
+      <TaskManager searchParams={searchParams} />
     </main>
   )
 }

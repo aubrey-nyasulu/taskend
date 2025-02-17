@@ -3,15 +3,15 @@
 import { createContext, Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react"
 
 type UiState = {
-    addNewFieldmodalIsOpen: boolean
-    setAddNewFieldModalIsOpen: Dispatch<SetStateAction<boolean>>
+    isAddNewFieldModalOpen: boolean
+    setIsAddNewFieldModalOpen: Dispatch<SetStateAction<boolean>>
     createTaskModalIsOpen: boolean
     setCreateTaskModalIsOpen: Dispatch<SetStateAction<boolean>>
 }
 
 const initialState: UiState = {
-    addNewFieldmodalIsOpen: false,
-    setAddNewFieldModalIsOpen: () => { },
+    isAddNewFieldModalOpen: false,
+    setIsAddNewFieldModalOpen: () => { },
     createTaskModalIsOpen: false,
     setCreateTaskModalIsOpen: () => { },
 }
@@ -19,13 +19,13 @@ const initialState: UiState = {
 const UIContext = createContext<UiState>(initialState)
 
 export const UIContextProvider = ({ children }: { children: ReactNode }) => {
-    const [addNewFieldmodalIsOpen, setAddNewFieldModalIsOpen] = useState(false)
+    const [isAddNewFieldModalOpen, setIsAddNewFieldModalOpen] = useState(false)
     const [createTaskModalIsOpen, setCreateTaskModalIsOpen] = useState(false)
 
     return (
         <UIContext.Provider value={{
-            addNewFieldmodalIsOpen,
-            setAddNewFieldModalIsOpen,
+            isAddNewFieldModalOpen,
+            setIsAddNewFieldModalOpen,
             createTaskModalIsOpen,
             setCreateTaskModalIsOpen,
         }}>

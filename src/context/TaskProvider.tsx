@@ -1,10 +1,17 @@
 "use client"
 
 import { tasks } from "@/lib/data"
+import { countPages } from "@/lib/utils"
 import { ColumnType, RowType } from "@/types"
-import { createContext, ReactNode, useEffect, useState } from "react"
+import { createContext, Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react"
 
 type TaskState = {
+    pages: number
+    ProtectedFields: {
+        title: string;
+        status: string;
+        priority: string;
+    }
     columns: ColumnType[]
     rows: RowType[]
     addNewField: (name: string, type: 'text' | 'number' | 'checkbox') => void
@@ -16,14 +23,12 @@ type TaskState = {
     }) => void
     createTask: (task: RowType) => void
     deleteTask: (taskToDeleteId: number) => void
-    ProtectedFields: {
-        title: string;
-        status: string;
-        priority: string;
-    }
+    fetchTasks(page?: number): void
 }
 
 const initialState: TaskState = {
+    ProtectedFields: { title: 'title', status: 'status', priority: 'priority' },
+    pages: 0,
     columns: [],
     rows: [],
     addNewField: () => { },
@@ -31,16 +36,18 @@ const initialState: TaskState = {
     editTask: () => { },
     createTask: () => { },
     deleteTask: () => { },
-    ProtectedFields: { title: 'title', status: 'status', priority: 'priority' }
+    fetchTasks: () => { },
 }
 
 const TaskContext = createContext<TaskState>(initialState)
 
 export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
     const ProtectedFields = { title: 'title', status: 'status', priority: 'priority' }
+    const limit = 20
 
     const [columns, setColumns] = useState<ColumnType[]>([])
     const [rows, setRows] = useState<RowType[]>([])
+    const [pages, setPages] = useState(0)
 
     const addColumnToRows = (columnId: string) => {
         setRows((prevRows) =>
@@ -99,6 +106,8 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
 
         updatedList.pop()
         setRows(updatedList)
+
+        setPages(countPages(tasks.length + 1, limit))
     }
 
     const deleteTask = (taskToDeleteId: number) => {
@@ -109,33 +118,36 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem('tasks', JSON.stringify(filteredTasks))
 
         fetchTasks()
+
+        setPages(countPages(tasks.length - 1, limit))
     }
 
-    function fetchTasks(limit = 10, page = 1) {
-        let tasks: RowType[] = JSON.parse(localStorage.getItem('tasks') || '')
+    function fetchTasks(page = 1) {
+        const tasks: RowType[] = JSON.parse(localStorage.getItem('tasks') || '')
 
         if (tasks && tasks.length > 1) {
             const sliceStartIndex = tasks.length - (limit * page)
             const sliceEndIndex = tasks.length - (limit * (page - 1))
-            tasks = tasks.slice(sliceStartIndex, sliceEndIndex)
+            const currentPageTasks = tasks.slice(sliceStartIndex, sliceEndIndex)
 
-            setRows(tasks.reverse())
+            setRows(currentPageTasks.reverse())
 
             setColumns([
                 { name: "title", type: 'text' },
                 { name: "status", type: 'button' },
                 { name: "priority", type: 'button' }
             ])
+
+            setPages(countPages(tasks.length, limit))
         }
     }
 
-    useEffect(() => {
-        // localStorage.setItem('tasks', JSON.stringify(tasks))
-        fetchTasks()
-    }, [])
+    // localStorage.setItem('tasks', JSON.stringify(tasks))
 
     return (
         <TaskContext.Provider value={{
+            pages,
+            ProtectedFields,
             columns,
             rows,
             addNewField,
@@ -143,7 +155,7 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
             editTask,
             createTask,
             deleteTask,
-            ProtectedFields
+            fetchTasks,
         }}
         >
             {children}

@@ -10,3 +10,7 @@ export const duplicateFielNameExists = ({ columns, value }: DuplicateExistsParam
 
     return !!fieldExist
 }
+
+export const countPages = (length: number, limit: number) => {
+    return Math.round(length / limit)
+}

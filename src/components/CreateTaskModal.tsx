@@ -1,6 +1,7 @@
 import TaskContext from "@/context/TaskProvider"
 import { RowType } from "@/types"
 import clsx from "clsx"
+import { useRouter } from "next/navigation"
 import { Dispatch, SetStateAction, useContext, useEffect, useRef } from "react"
 
 export default function CreateTaskModal({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: Dispatch<SetStateAction<boolean>> }) {
@@ -26,6 +27,7 @@ export default function CreateTaskModal({ isOpen, setIsOpen }: { isOpen: boolean
     }
   }, [isOpen])
 
+  const router = useRouter()
   const handleSubmit = (formData: FormData) => {
     let data: any = formData.entries()
 
@@ -35,6 +37,9 @@ export default function CreateTaskModal({ isOpen, setIsOpen }: { isOpen: boolean
 
     formRef.current?.reset()
     setIsOpen(false)
+
+    router.push('/tasks?page=1')
+    // window.location.href = '/tasks?page=1'
   }
 
   return (
