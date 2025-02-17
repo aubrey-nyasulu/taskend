@@ -8,5 +8,5 @@ export type RowType = {
 
 export type ColumnType = {
     name: string;
-    type: string | number | checkbox;
+    type: 'text' | 'number' | 'checkbox' | 'button';
 }

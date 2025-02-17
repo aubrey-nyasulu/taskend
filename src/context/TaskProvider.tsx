@@ -1,18 +1,21 @@
 "use client"
 
+import { tasks } from "@/lib/data"
 import { ColumnType, RowType } from "@/types"
 import { createContext, ReactNode, useEffect, useState } from "react"
 
 type TaskState = {
     columns: ColumnType[]
     rows: RowType[]
-    addNewField: (name: string, type: string) => void
+    addNewField: (name: string, type: 'text' | 'number' | 'checkbox') => void
     removeColumn: (columnId: string) => void
     editTask: ({ id, fieldName, value }: {
         id: number;
         fieldName: string;
         value: string;
     }) => void
+    createTask: (task: RowType) => void
+    deleteTask: (taskToDeleteId: number) => void
     ProtectedFields: {
         title: string;
         status: string;
@@ -24,8 +27,10 @@ const initialState: TaskState = {
     columns: [],
     rows: [],
     addNewField: () => { },
-    removeColumn: (columnId: string) => { },
+    removeColumn: () => { },
     editTask: () => { },
+    createTask: () => { },
+    deleteTask: () => { },
     ProtectedFields: { title: 'title', status: 'status', priority: 'priority' }
 }
 
@@ -43,8 +48,8 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
         )
     }
 
-    const addColumn = (name: string, type: string) => {
-        const newColumn = { name, type }
+    const addColumn = (name: string, type: 'text' | 'number' | 'checkbox') => {
+        const newColumn: ColumnType = { name, type }
         setColumns([...columns, newColumn])
     }
 
@@ -61,26 +66,9 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
         }))
     }
 
-    const addNewField = (name: string, type: string) => {
+    const addNewField = (name: string, type: 'text' | 'number' | 'checkbox') => {
         addColumn(name, type)
         addColumnToRows(name)
-    }
-
-    function fetchTasks(limit = 10, page = 1) {
-        let tasks = JSON.parse(localStorage.getItem('tasks') || '')
-
-        if (tasks && tasks.length > 1) {
-            tasks = tasks.slice(limit * (page - 1), limit * page)
-
-            console.log({ tasks })
-            setRows(tasks)
-
-            setColumns([
-                { name: "title", type: 'text' },
-                { name: "status", type: 'text' },
-                { name: "priority", type: 'text' }
-            ])
-        }
     }
 
     const editTask = ({ id, fieldName, value }: { id: number, fieldName: string, value: string }) => {
@@ -99,7 +87,50 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem('tasks', JSON.stringify(updatedTasks))
     }
 
+    const createTask = (task: RowType) => {
+        const tasks: RowType[] = JSON.parse(localStorage.getItem('tasks') || '')
+
+        task.id = tasks[tasks.length - 1].id + 1
+        tasks.push(task)
+
+        localStorage.setItem('tasks', JSON.stringify(tasks))
+
+        const updatedList = [task, ...rows]
+
+        updatedList.pop()
+        setRows(updatedList)
+    }
+
+    const deleteTask = (taskToDeleteId: number) => {
+        const tasks: RowType[] = JSON.parse(localStorage.getItem('tasks') || '')
+
+        const filteredTasks = tasks.filter(({ id }) => id !== taskToDeleteId)
+
+        localStorage.setItem('tasks', JSON.stringify(filteredTasks))
+
+        fetchTasks()
+    }
+
+    function fetchTasks(limit = 10, page = 1) {
+        let tasks: RowType[] = JSON.parse(localStorage.getItem('tasks') || '')
+
+        if (tasks && tasks.length > 1) {
+            const sliceStartIndex = tasks.length - (limit * page)
+            const sliceEndIndex = tasks.length - (limit * (page - 1))
+            tasks = tasks.slice(sliceStartIndex, sliceEndIndex)
+
+            setRows(tasks.reverse())
+
+            setColumns([
+                { name: "title", type: 'text' },
+                { name: "status", type: 'button' },
+                { name: "priority", type: 'button' }
+            ])
+        }
+    }
+
     useEffect(() => {
+        // localStorage.setItem('tasks', JSON.stringify(tasks))
         fetchTasks()
     }, [])
 
@@ -110,6 +141,8 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
             addNewField,
             removeColumn,
             editTask,
+            createTask,
+            deleteTask,
             ProtectedFields
         }}
         >

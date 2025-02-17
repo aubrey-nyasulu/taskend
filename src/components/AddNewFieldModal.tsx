@@ -84,7 +84,7 @@ export default function AddNewFieldModal({ isOpen, onClose }: NewFieldModalProps
                     const formData = new FormData(e.target as HTMLFormElement)
 
                     const name = formData.get('name') as string
-                    const type = formData.get('field-type') as string
+                    const type = formData.get('field-type') as 'text' | 'number' | 'checkbox'
 
                     if (name && type) {
                         addNewField(name, type)
