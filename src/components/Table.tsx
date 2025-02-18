@@ -6,11 +6,13 @@ import AddNewFieldModal from "./AddNewFieldModal"
 import TaskContext from "@/context/TaskProvider"
 import FieldNameOptionsModal from "./FieldNameOptionsModal"
 import EditableCell from "./EditableCell"
+import { useRouter } from "next/navigation"
 
 function Table() {
     const [addNewFieldModalIsOpen, setAddNewFieldModalIsOpen] = useState(false)
     const [deleFieldModalIsOpen, setDeleFieldModalIsOpen] = useState(false)
     const [rightClickedField, setRightClickedField] = useState('')
+
 
     const { columns, rows, ProtectedFields, deleteTask } = useContext(TaskContext)
 
@@ -38,8 +40,6 @@ function Table() {
                                     className={clsx(
                                         "px-4 py-3 border cursor-context-menu",
                                         {
-                                            "cursor-not-allowed": name in ProtectedFields,
-                                            "cursor-pointer": !(name in ProtectedFields),
                                             "border-l-0": index === 0,
                                         }
                                     )}
@@ -51,7 +51,11 @@ function Table() {
                                         temp1(name)
                                     }}
                                 >
-                                    {name}
+                                    <div className="w-full flex gap-4 items-center justify-between">
+                                        {name}
+
+                                        <Solter field={name} />
+                                    </div>
                                 </th>
                             ))
                         }
@@ -126,3 +130,36 @@ function Table() {
 
 export default Table
 
+function Solter({ field }: { field: string }) {
+    const [order, setOrder] = useState('a')
+
+    const router = useRouter()
+
+    const sortByField = (arg: any) => {
+        const searchParams = new URLSearchParams(location.href.split('?')[1])
+
+        const page = searchParams.get('page')
+        const currentSortField = searchParams.get('sort')
+        const currentSortOrder = searchParams.get('order')
+
+        const order = currentSortField !== field ? 'a' : currentSortOrder === 'a' ? 'd' : 'a'
+
+        searchParams.set('page', page || '1')
+        searchParams.set('sort', field)
+        searchParams.set('order', order)
+
+        router.push(`/tasks?${searchParams}`)
+
+        // if (page) {
+        //     router.push(`/tasks?page=${page}&sort=${field}&order=${order}`)
+        // } else {
+        //     router.push(`/tasks?sort=${field}&order=${order}`)
+        // }
+
+        setOrder(order)
+    }
+
+    return (
+        <button onClick={sortByField}>{order}</button>
+    )
+}

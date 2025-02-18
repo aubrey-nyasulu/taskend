@@ -3,31 +3,39 @@
 import { createContext, Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react"
 
 type UiState = {
-    isAddNewFieldModalOpen: boolean
-    setIsAddNewFieldModalOpen: Dispatch<SetStateAction<boolean>>
-    createTaskModalIsOpen: boolean
-    setCreateTaskModalIsOpen: Dispatch<SetStateAction<boolean>>
+    isCreateTaskModalOpen: boolean
+    setIsCreateTaskModalOpen: Dispatch<SetStateAction<boolean>>
+    isFilterOpen: boolean,
+    setIsFilterOpen: Dispatch<SetStateAction<boolean>>
+    isSortOpen: boolean,
+    setIsSortOpen: Dispatch<SetStateAction<boolean>>
 }
 
 const initialState: UiState = {
-    isAddNewFieldModalOpen: false,
-    setIsAddNewFieldModalOpen: () => { },
-    createTaskModalIsOpen: false,
-    setCreateTaskModalIsOpen: () => { },
+    isCreateTaskModalOpen: false,
+    isFilterOpen: false,
+    setIsCreateTaskModalOpen: () => { },
+    setIsFilterOpen: () => { },
+    isSortOpen: false,
+    setIsSortOpen: () => { }
 }
 
 const UIContext = createContext<UiState>(initialState)
 
 export const UIContextProvider = ({ children }: { children: ReactNode }) => {
     const [isAddNewFieldModalOpen, setIsAddNewFieldModalOpen] = useState(false)
-    const [createTaskModalIsOpen, setCreateTaskModalIsOpen] = useState(false)
+    const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState(false)
+    const [isSortOpen, setIsSortOpen] = useState(false)
+    const [isFilterOpen, setIsFilterOpen] = useState(false)
 
     return (
         <UIContext.Provider value={{
-            isAddNewFieldModalOpen,
-            setIsAddNewFieldModalOpen,
-            createTaskModalIsOpen,
-            setCreateTaskModalIsOpen,
+            isCreateTaskModalOpen,
+            setIsCreateTaskModalOpen,
+            isFilterOpen,
+            setIsFilterOpen,
+            isSortOpen,
+            setIsSortOpen
         }}>
             {children}
         </UIContext.Provider>

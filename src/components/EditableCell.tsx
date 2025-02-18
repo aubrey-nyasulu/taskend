@@ -35,7 +35,10 @@ export default function EditableCell({ id, value, fieldName }: EditableCellPropT
     const inputRef = useRef<HTMLInputElement>(null)
 
     return (
-        <form onSubmit={handleInputChange}>
+        <form
+            onContextMenu={e => e.preventDefault()}
+            onSubmit={handleInputChange}
+        >
             <input
                 ref={inputRef}
                 type="text"

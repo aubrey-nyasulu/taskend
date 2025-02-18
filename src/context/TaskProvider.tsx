@@ -5,6 +5,14 @@ import { countPages } from "@/lib/utils"
 import { ColumnType, RowType } from "@/types"
 import { createContext, Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react"
 
+type FetchTasksPropTypes = {
+    page: number,
+    sortBy?: string,
+    order?: string,
+    filterValue?: string
+    filterConstraint?: 'contains' | 'does not contain' | 'starts with' | 'ends with'
+}
+
 type TaskState = {
     pages: number
     ProtectedFields: {
@@ -23,7 +31,7 @@ type TaskState = {
     }) => void
     createTask: (task: RowType) => void
     deleteTask: (taskToDeleteId: number) => void
-    fetchTasks(page?: number): void
+    fetchTasks(tasks: FetchTasksPropTypes): void
 }
 
 const initialState: TaskState = {
@@ -48,6 +56,7 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
     const [columns, setColumns] = useState<ColumnType[]>([])
     const [rows, setRows] = useState<RowType[]>([])
     const [pages, setPages] = useState(0)
+    const [currentPage, setCurrentPage] = useState(1)
 
     const addColumnToRows = (columnId: string) => {
         setRows((prevRows) =>
@@ -117,20 +126,30 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
 
         localStorage.setItem('tasks', JSON.stringify(filteredTasks))
 
-        fetchTasks()
+        fetchTasks({ page: currentPage })
 
         setPages(countPages(tasks.length - 1, limit))
     }
 
-    function fetchTasks(page = 1) {
-        const tasks: RowType[] = JSON.parse(localStorage.getItem('tasks') || '')
+    function fetchTasks({ filterConstraint, page, order, sortBy, filterValue }: FetchTasksPropTypes) {
+        let tasks: RowType[] = JSON.parse(localStorage.getItem('tasks') || '')
 
         if (tasks && tasks.length > 1) {
+            if (filterConstraint && filterValue) {
+                tasks = filterTasks({ tasks, filterConstraint, filterValue })
+            }
+
+            if (sortBy && order) {
+                tasks = sortTasks(tasks, sortBy, order)
+            }
+
             const sliceStartIndex = tasks.length - (limit * page)
             const sliceEndIndex = tasks.length - (limit * (page - 1))
-            const currentPageTasks = tasks.slice(sliceStartIndex, sliceEndIndex)
+            const currentPageTasks = tasks
+                .slice(sliceStartIndex, sliceEndIndex)
+                .reverse()
 
-            setRows(currentPageTasks.reverse())
+            setRows(currentPageTasks)
 
             setColumns([
                 { name: "title", type: 'text' },
@@ -163,4 +182,48 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
     )
 }
 
-export default TaskContext 
+export default TaskContext
+
+type FilterTasksPropTypes = {
+    tasks: RowType[],
+    filterValue: string,
+    filterConstraint: 'contains' | 'does not contain' | 'starts with' | 'ends with'
+}
+
+function filterTasks({ filterValue, filterConstraint, tasks }: FilterTasksPropTypes): RowType[] {
+    return tasks.filter(task => {
+        const title = task.title.toLowerCase()
+        const query = filterValue.toLowerCase()
+
+        switch (filterConstraint) {
+            case 'contains':
+                return title.includes(query)
+            case 'does not contain':
+                return !title.includes(query)
+            case 'starts with':
+                return title.startsWith(query)
+            case 'ends with':
+                return title.endsWith(query)
+            default:
+                return true // Return all tasks if the constraint is unknown
+        }
+    })
+}
+
+function sortTasks(tasks: RowType[], sortBy?: string, order?: string) {
+    tasks.sort((a, b) => {
+        // @ts-ignore
+        if (!a[sortBy]) return 1 // Move undefined/null to the end
+        // @ts-ignore
+        if (!b[sortBy]) return -1
+        if (order === 'a') {
+            // @ts-ignore
+            return a[sortBy].toLowerCase().localeCompare(b[sortBy].toLowerCase())
+        } else {
+            // @ts-ignore
+            return b[sortBy].toLowerCase().localeCompare(a[sortBy].toLowerCase())
+        }
+    })
+
+    return tasks
+}

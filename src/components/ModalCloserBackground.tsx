@@ -4,9 +4,25 @@ import UIContext from '@/context/UIProvider'
 import { useContext } from 'react'
 
 export default function ModalCloserBackground() {
-    const { setIsAddNewFieldModalOpen } = useContext(UIContext)
+    const { isCreateTaskModalOpen, isFilterOpen, isSortOpen, setIsSortOpen, setIsCreateTaskModalOpen, setIsFilterOpen } = useContext(UIContext)
 
     return (
-        <div className="absolute inset-0" onClick={() => setIsAddNewFieldModalOpen(false)}></div>
+        <>
+            {
+                (
+                    isCreateTaskModalOpen ||
+                    isFilterOpen ||
+                    isSortOpen
+                ) &&
+                < div
+                    className="absolute inset-0 z-40"
+                    onClick={() => {
+                        setIsCreateTaskModalOpen(false)
+                        setIsFilterOpen(false)
+                        setIsSortOpen(false)
+                    }}
+                ></div >
+            }
+        </>
     )
 }

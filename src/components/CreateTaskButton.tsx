@@ -4,12 +4,12 @@ import UIContext from '@/context/UIProvider'
 import React, { useContext } from 'react'
 
 export default function CreateTaskButton() {
-    const { setIsAddNewFieldModalOpen } = useContext(UIContext)
+    const { setIsCreateTaskModalOpen } = useContext(UIContext)
 
     return (
         <button
-            onClick={() => setIsAddNewFieldModalOpen(true)}
-            className="py-4 px-8 bg-stone-800 text-white rounded-full fixed bottom-4 right-8 z-30 "
+            onClick={() => setIsCreateTaskModalOpen(true)}
+            className="py-4 px-8 bg-stone-800 text-white font-semibold rounded-full fixed bottom-4 right-8 z-50 "
         >
             Create Task
         </button>

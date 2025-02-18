@@ -25,7 +25,7 @@ export default function RootLayout({
       <body className={`${inter.className} text-stone-950 dark:text-stone-300 flex gap-4`}>
         <TaskContextProvider>
           <UIContextProvider>
-            <header className="w-[340px] h-svh fixed left-0 top-0">
+            <header className="w-[340px] h-svh fixed left-0 top-0 hidden md:block">
               <nav className="h-full flex flex-col justify-between">
                 <Link href={'/tasks'}>taks</Link>
 
@@ -33,7 +33,7 @@ export default function RootLayout({
               </nav>
             </header>
 
-            <div className="w-[340px] h-svh"></div>
+            <div className="w-[340px] h-svh hidden md:block"></div>
 
             {children}
 

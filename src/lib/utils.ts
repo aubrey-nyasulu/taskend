@@ -1,5 +1,19 @@
 import { ColumnType } from "@/types"
 
+export const debounce = (() => {
+    let timer: NodeJS.Timeout | undefined
+
+    return (callback: Function) => {
+        if (timer !== undefined) {
+            clearTimeout(timer)
+        }
+
+        timer = setTimeout(() => {
+            callback()
+        }, 400);
+    }
+})()
+
 type DuplicateExistsParams = {
     value: string
     columns: ColumnType[]
