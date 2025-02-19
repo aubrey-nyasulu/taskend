@@ -123,8 +123,8 @@ function TableSort() {
             )}>
                 <div className="flex gap-4 items-center mb-4">
                     <select
-                        name="filterBy"
-                        id="filterBy"
+                        name="sortBy"
+                        id="sortBy"
                         onChange={e => setFilterBy(e.currentTarget.value)}
                         className="py-2 px-3"
                     >

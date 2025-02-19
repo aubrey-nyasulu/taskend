@@ -17,8 +17,8 @@ type TaskState = {
     ProtectedFields: Record<string, string>
     columns: ColumnType[]
     rows: RowType[]
-    undoStack: RowType[][]
-    redoStack: RowType[][]
+    undoStack: { rows: RowType[], columns: ColumnType[] }[]
+    redoStack: { rows: RowType[], columns: ColumnType[] }[]
     undo: () => void
     redo: () => void
     addNewField: (name: string, type: 'text' | 'number' | 'checkbox') => void
@@ -55,8 +55,8 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
     const [rows, setRows] = useState<RowType[]>([])
     const [pages, setPages] = useState(0)
     const [currentPage, setCurrentPage] = useState(1)
-    const [undoStack, setUndoStack] = useState<RowType[][]>([])
-    const [redoStack, setRedoStack] = useState<RowType[][]>([])
+    const [undoStack, setUndoStack] = useState<{ rows: RowType[], columns: ColumnType[] }[]>([])
+    const [redoStack, setRedoStack] = useState<{ rows: RowType[], columns: ColumnType[] }[]>([])
 
     const defaultCloumns: ColumnType[] = [
         { name: "title", type: "text" },
@@ -72,16 +72,22 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [])
 
+    const MAX_STACK_SIZE = 10
     const saveState = () => {
-        setUndoStack(prev => [...prev, cachedTasks])
+        setUndoStack(prev => {
+            const newStack = [...prev, { rows: cachedTasks, columns }]
+            return newStack.length > MAX_STACK_SIZE ? newStack.slice(1) : newStack
+        })
+
         setRedoStack([]) // Clear redo stack on new changes
     }
 
     // Undo last change
     const undo = () => {
         if (undoStack.length === 0) return
-        setRedoStack(prev => [...prev, cachedTasks]) // Save current state before undoing
-        setStoredTasks(undoStack[undoStack.length - 1]) // Restore previous state
+        setRedoStack(prev => [...prev, { rows: cachedTasks, columns }]) // Save current state before undoing
+        setStoredTasks(undoStack[undoStack.length - 1].rows) // Restore previous state
+        setStoredColumns(undoStack[undoStack.length - 1].columns)
         setUndoStack(prev => prev.slice(0, -1)) // Remove last state
 
         fetchTasks({ page: currentPage })
@@ -90,14 +96,17 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
     // Redo last undone change
     const redo = () => {
         if (redoStack.length === 0) return
-        setUndoStack(prev => [...prev, cachedTasks]) // Save current state before redoing
-        setStoredTasks(redoStack[redoStack.length - 1]) // Restore next state
+        setUndoStack(prev => [...prev, { rows: cachedTasks, columns }]) // Save current state before redoing
+        setStoredTasks(redoStack[redoStack.length - 1].rows) // Restore next state
+        setStoredColumns(undoStack[undoStack.length - 1].columns)
         setRedoStack(prev => prev.slice(0, -1)) // Remove last state
 
         fetchTasks({ page: currentPage })
     }
 
     const addNewField = (name: string, type: 'text' | 'number' | 'checkbox') => {
+        saveState()
+
         const updatedColumns = [...columns, { name, type }]
         setColumns(updatedColumns)
 
@@ -108,6 +117,8 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
 
     const removeColumn = (columnId: string) => {
         if (initialState.ProtectedFields[columnId]) return
+
+        saveState()
 
         const filteredColumns = columns.filter(col => col.name !== columnId)
 

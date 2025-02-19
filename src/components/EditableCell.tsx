@@ -13,15 +13,9 @@ export default function EditableCell({ id, value, fieldName }: EditableCellPropT
         setInputValue(value || '')
     }, [value])
 
-    useEffect(() => {
-        if (inputRef.current) {
-            inputRef.current.addEventListener('blur', function save() {
-                editTask(id, fieldName, inputValue)
-
-                this.removeEventListener('blur', save)
-            })
-        }
-    }, [inputValue, id, fieldName, inputValue])
+    function save() {
+        editTask(id, fieldName, inputValue)
+    }
 
     const handleInputChange = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -42,7 +36,10 @@ export default function EditableCell({ id, value, fieldName }: EditableCellPropT
                 ref={inputRef}
                 type="text"
                 value={inputValue}
+                name={`cell-${id}`}
+                id={`cell-${id}`}
                 onChange={e => setInputValue(e.target.value)}
+                onBlur={() => save()}
                 className="focus:bg-stone-100 focus:shadow-md focus:pl-2 focus:rounded-lg focus:scale-110 h-full py-3 cursor-pointer focus:cursor-text"
             />
         </form>

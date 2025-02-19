@@ -47,7 +47,7 @@ export default function CreateTaskModal({ isOpen, setIsOpen }: { isOpen: boolean
       ref={formRef}
       action={handleSubmit}
       className={clsx(
-        "w-full bg-white shadow-md dark:bg-stone-900  rounded-t-[32px]  absolute bottom-0 left-[50%] -translate-x-[50%] z-40 ease-linear duration-200 overflow-hidden flex gap-8 flex-col justify-between ",
+        "w-full bg-white shadow-md dark:bg-stone-900  rounded-t-[32px]  absolute bottom-0 left-[50%] -translate-x-[50%] z-[99] ease-linear duration-200 overflow-hidden flex gap-8 flex-col justify-between ",
         {
           "w-full h-[calc(100%_-_32px)] px-8 pt-12 pb-8": isOpen,
           "w-full h-0 pt-0": !isOpen,
