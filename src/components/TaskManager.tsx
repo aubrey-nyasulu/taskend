@@ -100,9 +100,6 @@ function TableSort() {
         searchParams.delete('sort')
         searchParams.delete('order')
         router.push(`/tasks?${searchParams}`)
-
-        setFilterBy('status')
-        setFilterOrder('a')
     }
 
     return (
@@ -177,6 +174,7 @@ function TableFilter() {
     useEffect(() => {
         const searchParams = new URLSearchParams(location.href.split('?')[1])
 
+        searchParams.set('page', '1')
         searchParams.set('filter', filterValue)
         searchParams.set('filterConstraint', filterConstraint)
         router.push(`/tasks?${searchParams}`)
@@ -184,9 +182,13 @@ function TableFilter() {
     }, [filterValue, filterConstraint])
 
 
-    // const filter = (filterValue: string) => {
-    //     setFilterValue(filterValue)
-    // }
+    const deleteFilter = () => {
+        const searchParams = new URLSearchParams(location.href.split('?')[1])
+
+        searchParams.delete('filter')
+        searchParams.delete('filterConstraint')
+        router.push(`/tasks?${searchParams}`)
+    }
 
     return (
         <div className="flex gap-2 items-center relative z-50">
@@ -230,7 +232,12 @@ function TableFilter() {
                     />
                 </div>
 
-                <button className="opacity-80 px-2 py-1 border rounded-md bg-red-500 text-white">Remove filter</button>
+                <button
+                    onClick={() => deleteFilter()}
+                    className="opacity-80 px-2 py-1 border rounded-md bg-red-500 text-white"
+                >
+                    Remove filter
+                </button>
             </div>
         </div>
     )

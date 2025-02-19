@@ -5,7 +5,7 @@ export type TaskPageSearchParams = {
   searchParams: {
     page?: string
     sort?: string
-    order?: string
+    order?: 'a' | 'd'
     filter?: string
     filterConstraint?: 'contains' | 'does not contain' | 'starts with' | 'ends with'
   }

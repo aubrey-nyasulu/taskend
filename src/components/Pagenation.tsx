@@ -5,13 +5,12 @@ import React, { useContext } from 'react'
 export default function Pagenation() {
     const { pages } = useContext(TaskContext)
 
-    const generateUrl = (pageNumber: number) => {
+    const generateUrl = (pageNumber: string) => {
         const searchParams = new URLSearchParams(location.href.split('?')[1])
 
-        const sort = searchParams.get('sort')
-        const order = searchParams.get('order')
+        searchParams.set('page', pageNumber)
 
-        return `/tasks?page=${pageNumber}&sort=${sort}&order=${order}`
+        return `/tasks?${searchParams}`
     }
 
     return (
@@ -22,7 +21,7 @@ export default function Pagenation() {
                     .map(pageNumber => (
                         <Link
                             key={pageNumber}
-                            href={generateUrl(pageNumber)}
+                            href={generateUrl(`${pageNumber}`)}
                             className="aspect-square w-8 grid place-content-center bg-stone-100 rounded-full"
                         >
                             {pageNumber}

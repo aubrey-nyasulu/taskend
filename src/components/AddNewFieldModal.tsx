@@ -63,7 +63,7 @@ export default function AddNewFieldModal({ isOpen, onClose }: NewFieldModalProps
     if (!isOpen) return null
 
     const handleFieldNameChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value.trim()
+        const value = e.target.value
         setFieldName(value)
 
         if (!value) {
@@ -78,8 +78,19 @@ export default function AddNewFieldModal({ isOpen, onClose }: NewFieldModalProps
     return (
         <ModalContainer {...{ isOpen, onClose }}>
             <div ref={modalRef} className="relative bg-white p-6 rounded-lg shadow-lg z-50 w-96">
+                <button
+                    onClick={(e) => {
+                        console.log(e)
+                        setFieldName('')
+                        onClose()
+                    }}
+                    className="text-lg font-semibold w-fit h-fit absolute right-4 top-2">
+                    X
+                </button>
+
                 <form onSubmit={e => {
                     e.preventDefault()
+                    console.log('submitting')
 
                     const formData = new FormData(e.target as HTMLFormElement)
 
@@ -94,16 +105,6 @@ export default function AddNewFieldModal({ isOpen, onClose }: NewFieldModalProps
                 }}>
                     <div className="w-full flex justify-between items-center mb-4">
                         <h2 className="text-lg font-semibold">Add New Field</h2>
-
-                        <button
-                            onClick={(e) => {
-                                console.log(e)
-                                setFieldName('')
-                                onClose()
-                            }}
-                            className="text-lg font-semibold w-fit h-fit">
-                            X
-                        </button>
                     </div>
 
                     <input

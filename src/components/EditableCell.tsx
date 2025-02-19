@@ -9,20 +9,19 @@ export default function EditableCell({ id, value, fieldName }: EditableCellPropT
     const { editTask } = useContext(TaskContext)
 
     useEffect(() => {
-        setInputValue(value)
+        console.log('ed cell', { fieldName, value })
+        setInputValue(value || '')
     }, [value])
-
-    const save = () => {
-        editTask({ id, fieldName, value: inputValue })
-    }
 
     useEffect(() => {
         if (inputRef.current) {
-            inputRef.current.addEventListener('blur', save)
-        }
+            inputRef.current.addEventListener('blur', function save() {
+                editTask(id, fieldName, inputValue)
 
-        return () => inputRef.current?.removeEventListener('blur', save)
-    }, [inputValue])
+                this.removeEventListener('blur', save)
+            })
+        }
+    }, [inputValue, id, fieldName, inputValue])
 
     const handleInputChange = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()

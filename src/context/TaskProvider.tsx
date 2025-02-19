@@ -1,41 +1,32 @@
 "use client"
-
-import { tasks } from "@/lib/data"
-import { countPages } from "@/lib/utils"
+import { createContext, ReactNode, useEffect, useState } from "react"
+import { countPages, getStoredColumns, setStoredColumns } from "@/lib/utils"
 import { ColumnType, RowType } from "@/types"
-import { createContext, Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react"
+import { filterTasks, sortTasks, getStoredTasks, setStoredTasks } from "@/lib/utils"
 
 type FetchTasksPropTypes = {
-    page: number,
-    sortBy?: string,
-    order?: string,
+    page: number
+    sortBy?: string
+    order?: 'a' | 'd'
     filterValue?: string
     filterConstraint?: 'contains' | 'does not contain' | 'starts with' | 'ends with'
 }
 
 type TaskState = {
     pages: number
-    ProtectedFields: {
-        title: string;
-        status: string;
-        priority: string;
-    }
+    ProtectedFields: Record<string, string>
     columns: ColumnType[]
     rows: RowType[]
     addNewField: (name: string, type: 'text' | 'number' | 'checkbox') => void
     removeColumn: (columnId: string) => void
-    editTask: ({ id, fieldName, value }: {
-        id: number;
-        fieldName: string;
-        value: string;
-    }) => void
+    editTask: (id: number, fieldName: string, value: string) => void
     createTask: (task: RowType) => void
     deleteTask: (taskToDeleteId: number) => void
-    fetchTasks(tasks: FetchTasksPropTypes): void
+    fetchTasks: (params: FetchTasksPropTypes) => void
 }
 
 const initialState: TaskState = {
-    ProtectedFields: { title: 'title', status: 'status', priority: 'priority' },
+    ProtectedFields: { title: "title", status: "status", priority: "priority" },
     pages: 0,
     columns: [],
     rows: [],
@@ -50,180 +41,109 @@ const initialState: TaskState = {
 const TaskContext = createContext<TaskState>(initialState)
 
 export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
-    const ProtectedFields = { title: 'title', status: 'status', priority: 'priority' }
     const limit = 20
-
+    const [cachedTasks, setCachedTasks] = useState<RowType[]>([])
     const [columns, setColumns] = useState<ColumnType[]>([])
     const [rows, setRows] = useState<RowType[]>([])
     const [pages, setPages] = useState(0)
     const [currentPage, setCurrentPage] = useState(1)
 
-    const addColumnToRows = (columnId: string) => {
-        setRows((prevRows) =>
-            prevRows.map((row) => ({ ...row, [columnId]: "" })) // Empty value for new column
-        )
-    }
+    const defaultCloumns: ColumnType[] = [
+        { name: "title", type: "text" },
+        { name: "status", type: "button" },
+        { name: "priority", type: "button" },
+    ]
 
-    const addColumn = (name: string, type: 'text' | 'number' | 'checkbox') => {
-        const newColumn: ColumnType = { name, type }
-        setColumns([...columns, newColumn])
+    useEffect(() => {
+        const columns = getStoredColumns()
+
+        if (!columns) {
+            setStoredColumns(defaultCloumns)
+        }
+    }, [])
+
+    const addNewField = (name: string, type: 'text' | 'number' | 'checkbox') => {
+        const updatedColumns = [...columns, { name, type }]
+        setColumns(updatedColumns)
+
+        setRows(prevRows => prevRows.map(row => ({ ...row, [name]: "" })))
+
+        setStoredColumns(updatedColumns)
     }
 
     const removeColumn = (columnId: string) => {
-        if (columnId in ProtectedFields) return
+        if (initialState.ProtectedFields[columnId]) return
 
-        setColumns(columns.filter((col) => col.name !== columnId));
+        const filteredColumns = columns.filter(col => col.name !== columnId)
 
-        // @ts-ignore
-        setRows(rows.map((row) => {
+        setColumns(filteredColumns)
+
+        setRows(prev => prev.map(row => {
             const { [columnId]: _, ...rest } = row
-
-            return rest
+            return rest as RowType
         }))
+
+        setStoredColumns(filteredColumns)
     }
 
-    const addNewField = (name: string, type: 'text' | 'number' | 'checkbox') => {
-        addColumn(name, type)
-        addColumnToRows(name)
-    }
+    const editTask = (id: number, fieldName: string, value: string) => {
+        const updatedRows = rows.map(task =>
+            task.id === id ? { ...task, [fieldName]: value } : task
+        )
+        setRows(updatedRows)
 
-    const editTask = ({ id, fieldName, value }: { id: number, fieldName: string, value: string }) => {
-        const tasks: RowType[] = JSON.parse(localStorage.getItem('tasks') || '')
-
-        const updatedTasks = tasks.map(task => {
-            if (task.id === id) {
-                return { ...task, [fieldName]: value }
-            }
-
-            return task
-        })
-
-        console.log({ updatedTasks })
-
-        localStorage.setItem('tasks', JSON.stringify(updatedTasks))
+        const updatedStorageTasks = cachedTasks.map(task =>
+            task.id === id ? { ...task, [fieldName]: value } : task
+        )
+        setStoredTasks(updatedStorageTasks)
     }
 
     const createTask = (task: RowType) => {
-        const tasks: RowType[] = JSON.parse(localStorage.getItem('tasks') || '')
-
-        task.id = tasks[tasks.length - 1].id + 1
+        const tasks = getStoredTasks()
+        task.id = tasks.length ? tasks[tasks.length - 1].id + 1 : 1
         tasks.push(task)
+        setStoredTasks(tasks)
 
-        localStorage.setItem('tasks', JSON.stringify(tasks))
+        setRows([task, ...rows].slice(0, limit))
 
-        const updatedList = [task, ...rows]
-
-        updatedList.pop()
-        setRows(updatedList)
-
-        setPages(countPages(tasks.length + 1, limit))
+        setPages(countPages(tasks.length, limit))
     }
 
     const deleteTask = (taskToDeleteId: number) => {
-        const tasks: RowType[] = JSON.parse(localStorage.getItem('tasks') || '')
+        const tasks = getStoredTasks().filter(({ id }) => id !== taskToDeleteId)
+        setStoredTasks(tasks)
 
-        const filteredTasks = tasks.filter(({ id }) => id !== taskToDeleteId)
-
-        localStorage.setItem('tasks', JSON.stringify(filteredTasks))
+        setPages(countPages(tasks.length, limit))
 
         fetchTasks({ page: currentPage })
-
-        setPages(countPages(tasks.length - 1, limit))
     }
 
-    function fetchTasks({ filterConstraint, page, order, sortBy, filterValue }: FetchTasksPropTypes) {
-        let tasks: RowType[] = JSON.parse(localStorage.getItem('tasks') || '')
+    const fetchTasks = ({ filterConstraint, page, order, sortBy, filterValue }: FetchTasksPropTypes) => {
+        let tasks = getStoredTasks()
+        setCachedTasks(tasks)
 
-        if (tasks && tasks.length > 1) {
-            if (filterConstraint && filterValue) {
-                tasks = filterTasks({ tasks, filterConstraint, filterValue })
-            }
+        if (filterConstraint && filterValue) tasks = filterTasks(tasks, filterValue, filterConstraint)
+        if (sortBy && order) tasks = sortTasks(tasks, sortBy, order)
 
-            if (sortBy && order) {
-                tasks = sortTasks(tasks, sortBy, order)
-            }
+        let sliceStartIndex = tasks.length - (limit * page)
+        let sliceEndIndex = tasks.length - (limit * (page - 1))
 
-            const sliceStartIndex = tasks.length - (limit * page)
-            const sliceEndIndex = tasks.length - (limit * (page - 1))
-            const currentPageTasks = tasks
-                .slice(sliceStartIndex, sliceEndIndex)
-                .reverse()
+        sliceStartIndex = sliceStartIndex >= 0 ? sliceStartIndex : 0
+        sliceEndIndex = sliceEndIndex >= 0 ? sliceEndIndex : 0
+        setRows(tasks.slice(sliceStartIndex, sliceEndIndex).reverse())
 
-            setRows(currentPageTasks)
+        const columns = getStoredColumns()
+        setColumns(columns)
 
-            setColumns([
-                { name: "title", type: 'text' },
-                { name: "status", type: 'button' },
-                { name: "priority", type: 'button' }
-            ])
-
-            setPages(countPages(tasks.length, limit))
-        }
+        setPages(countPages(tasks.length, limit))
+        setCurrentPage(page)
     }
-
-    // localStorage.setItem('tasks', JSON.stringify(tasks))
 
     return (
-        <TaskContext.Provider value={{
-            pages,
-            ProtectedFields,
-            columns,
-            rows,
-            addNewField,
-            removeColumn,
-            editTask,
-            createTask,
-            deleteTask,
-            fetchTasks,
-        }}
-        >
+        <TaskContext.Provider value={{ pages, ProtectedFields: initialState.ProtectedFields, columns, rows, addNewField, removeColumn, editTask, createTask, deleteTask, fetchTasks }}>
             {children}
         </TaskContext.Provider>
     )
 }
 
 export default TaskContext
-
-type FilterTasksPropTypes = {
-    tasks: RowType[],
-    filterValue: string,
-    filterConstraint: 'contains' | 'does not contain' | 'starts with' | 'ends with'
-}
-
-function filterTasks({ filterValue, filterConstraint, tasks }: FilterTasksPropTypes): RowType[] {
-    return tasks.filter(task => {
-        const title = task.title.toLowerCase()
-        const query = filterValue.toLowerCase()
-
-        switch (filterConstraint) {
-            case 'contains':
-                return title.includes(query)
-            case 'does not contain':
-                return !title.includes(query)
-            case 'starts with':
-                return title.startsWith(query)
-            case 'ends with':
-                return title.endsWith(query)
-            default:
-                return true // Return all tasks if the constraint is unknown
-        }
-    })
-}
-
-function sortTasks(tasks: RowType[], sortBy?: string, order?: string) {
-    tasks.sort((a, b) => {
-        // @ts-ignore
-        if (!a[sortBy]) return 1 // Move undefined/null to the end
-        // @ts-ignore
-        if (!b[sortBy]) return -1
-        if (order === 'a') {
-            // @ts-ignore
-            return a[sortBy].toLowerCase().localeCompare(b[sortBy].toLowerCase())
-        } else {
-            // @ts-ignore
-            return b[sortBy].toLowerCase().localeCompare(a[sortBy].toLowerCase())
-        }
-    })
-
-    return tasks
-}
