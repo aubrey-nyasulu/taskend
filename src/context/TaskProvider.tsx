@@ -17,6 +17,10 @@ type TaskState = {
     ProtectedFields: Record<string, string>
     columns: ColumnType[]
     rows: RowType[]
+    undoStack: RowType[][]
+    redoStack: RowType[][]
+    undo: () => void
+    redo: () => void
     addNewField: (name: string, type: 'text' | 'number' | 'checkbox') => void
     removeColumn: (columnId: string) => void
     editTask: (id: number, fieldName: string, value: string) => void
@@ -30,6 +34,10 @@ const initialState: TaskState = {
     pages: 0,
     columns: [],
     rows: [],
+    undoStack: [],
+    redoStack: [],
+    undo: () => { },
+    redo: () => { },
     addNewField: () => { },
     removeColumn: () => { },
     editTask: () => { },
@@ -47,6 +55,8 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
     const [rows, setRows] = useState<RowType[]>([])
     const [pages, setPages] = useState(0)
     const [currentPage, setCurrentPage] = useState(1)
+    const [undoStack, setUndoStack] = useState<RowType[][]>([])
+    const [redoStack, setRedoStack] = useState<RowType[][]>([])
 
     const defaultCloumns: ColumnType[] = [
         { name: "title", type: "text" },
@@ -61,6 +71,31 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
             setStoredColumns(defaultCloumns)
         }
     }, [])
+
+    const saveState = () => {
+        setUndoStack(prev => [...prev, cachedTasks])
+        setRedoStack([]) // Clear redo stack on new changes
+    }
+
+    // Undo last change
+    const undo = () => {
+        if (undoStack.length === 0) return
+        setRedoStack(prev => [...prev, cachedTasks]) // Save current state before undoing
+        setStoredTasks(undoStack[undoStack.length - 1]) // Restore previous state
+        setUndoStack(prev => prev.slice(0, -1)) // Remove last state
+
+        fetchTasks({ page: currentPage })
+    }
+
+    // Redo last undone change
+    const redo = () => {
+        if (redoStack.length === 0) return
+        setUndoStack(prev => [...prev, cachedTasks]) // Save current state before redoing
+        setStoredTasks(redoStack[redoStack.length - 1]) // Restore next state
+        setRedoStack(prev => prev.slice(0, -1)) // Remove last state
+
+        fetchTasks({ page: currentPage })
+    }
 
     const addNewField = (name: string, type: 'text' | 'number' | 'checkbox') => {
         const updatedColumns = [...columns, { name, type }]
@@ -87,6 +122,8 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
     }
 
     const editTask = (id: number, fieldName: string, value: string) => {
+        saveState()
+
         const updatedRows = rows.map(task =>
             task.id === id ? { ...task, [fieldName]: value } : task
         )
@@ -95,21 +132,28 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
         const updatedStorageTasks = cachedTasks.map(task =>
             task.id === id ? { ...task, [fieldName]: value } : task
         )
+
         setStoredTasks(updatedStorageTasks)
+        setCachedTasks(updatedStorageTasks)
     }
 
     const createTask = (task: RowType) => {
-        const tasks = getStoredTasks()
+        saveState()
+
+        const tasks = cachedTasks
         task.id = tasks.length ? tasks[tasks.length - 1].id + 1 : 1
         tasks.push(task)
-        setStoredTasks(tasks)
-
         setRows([task, ...rows].slice(0, limit))
 
         setPages(countPages(tasks.length, limit))
+
+        setStoredTasks(tasks)
+        setCachedTasks(tasks)
     }
 
     const deleteTask = (taskToDeleteId: number) => {
+        saveState()
+
         const tasks = getStoredTasks().filter(({ id }) => id !== taskToDeleteId)
         setStoredTasks(tasks)
 
@@ -140,7 +184,7 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
     }
 
     return (
-        <TaskContext.Provider value={{ pages, ProtectedFields: initialState.ProtectedFields, columns, rows, addNewField, removeColumn, editTask, createTask, deleteTask, fetchTasks }}>
+        <TaskContext.Provider value={{ pages, ProtectedFields: initialState.ProtectedFields, columns, rows, undoStack, redoStack, undo, redo, addNewField, removeColumn, editTask, createTask, deleteTask, fetchTasks }}>
             {children}
         </TaskContext.Provider>
     )

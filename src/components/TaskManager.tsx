@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation"
 import ModalCloserBackground from "./ModalCloserBackground"
 import { debounce } from "@/lib/utils"
 import { TaskPageSearchParams } from "@/app/tasks/page"
+import UndoRedo from "./UndoRedo"
 
 export default function TaskManager({ searchParams }: TaskPageSearchParams) {
     const { setIsCreateTaskModalOpen, isCreateTaskModalOpen } = useContext(UIContext)
@@ -42,6 +43,8 @@ export default function TaskManager({ searchParams }: TaskPageSearchParams) {
 
                         <button className="focus:ring-1 focus:ring-stone-700 pb-1 px-4">Board</button>
                     </div>
+
+                    <UndoRedo />
 
                     <div className="flex gap-4 items-center">
                         <TableSort />
