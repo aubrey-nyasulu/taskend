@@ -154,7 +154,7 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
     const deleteTask = (taskToDeleteId: number) => {
         saveState()
 
-        const tasks = getStoredTasks().filter(({ id }) => id !== taskToDeleteId)
+        const tasks = cachedTasks.filter(({ id }) => id !== taskToDeleteId)
         setStoredTasks(tasks)
 
         setPages(countPages(tasks.length, limit))
