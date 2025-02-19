@@ -15,7 +15,7 @@ import UndoRedo from "./UndoRedo"
 
 export default function TaskManager({ searchParams }: TaskPageSearchParams) {
     const { setIsCreateTaskModalOpen, isCreateTaskModalOpen } = useContext(UIContext)
-    const { fetchTasks } = useContext(TaskContext)
+    const { fetchTasks, selectedTasks } = useContext(TaskContext)
 
     const page = Number(searchParams?.page) || 1
     const sort = searchParams?.sort
@@ -37,19 +37,32 @@ export default function TaskManager({ searchParams }: TaskPageSearchParams) {
                     "opacity-40 scale-95": isCreateTaskModalOpen
                 }
             )}>
-                <div className="w-full max-w-4xl flex gap-4 items-center justify-between mb-4">
-                    <div className="w-full flex gap-4 items-center justify-center ">
-                        <button className="border-b-[3px] border-b-stone-700 h-fit pb-1 px-4 focus:ring-1 focus:ring-stone-700">Table</button>
+                <div className="w-full max-w-4xl mx-auto flex flex-col gap-0 items-center mb-0">
 
-                        <button className="focus:ring-1 focus:ring-stone-700 pb-1 px-4">Board</button>
+                    <div className="w-full max-w-4xl flex gap-4 items-center justify-between mb-0 border-b">
+                        <div className="w-full flex gap-4 items-center ">
+                            <button className="border-b-[3px] border-b-stone-700 h-fit pb-2 px-4 focus:ring-1 focus:ring-stone-700">Table</button>
+
+                            <button className="focus:ring-1 focus:ring-stone-700 pb-1 px-4">Board</button>
+                        </div>
+
+                        <div className="flex gap-4 items-center pb-1">
+                            <UndoRedo />
+                            <TableSort />
+                            <TableFilter />
+                        </div>
                     </div>
 
-                    <UndoRedo />
+                    {
+                        selectedTasks.length > 0 &&
+                        <div className="flex gap-4 items-center   py-3 px-4 ">
+                            <SelectedCounter />
 
-                    <div className="flex gap-4 items-center">
-                        <TableSort />
-                        <TableFilter />
-                    </div>
+                            <button>status</button>
+                            <button>priority</button>
+                            <button>delete</button>
+                        </div>
+                    }
                 </div>
 
                 <div className="w-full h-full overflow-auto pb-4 px-[10%]">
@@ -109,7 +122,7 @@ function TableSort() {
         <div className="flex gap-2 items-center relative z-50">
             <button
                 onClick={() => setIsSortOpen(prevState => !prevState)}
-                className="px-4 py-2 border rounded-md"
+                className="px-3 py-1 border rounded-md"
             >
                 sort
             </button>
@@ -197,7 +210,7 @@ function TableFilter() {
         <div className="flex gap-2 items-center relative z-50">
             <button
                 onClick={() => setIsFilterOpen(prevState => !prevState)}
-                className="px-4 py-2 border rounded-md"
+                className="px-3 py-1 border rounded-md"
             >
                 Filter
             </button>
@@ -243,5 +256,21 @@ function TableFilter() {
                 </button>
             </div>
         </div>
+    )
+}
+
+function SelectedCounter() {
+    const { selectedTasks, columns } = useContext(TaskContext)
+
+    console.log({ selectedTasks })
+    return (
+        <>
+            {
+                selectedTasks.length > 0 &&
+                <div className="px-2 h-fit w-fit border grid place-content-center rounded-md">
+                    {selectedTasks.length} Selected
+                </div>
+            }
+        </>
     )
 }

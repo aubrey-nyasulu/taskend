@@ -1,5 +1,5 @@
 "use client"
-import { createContext, ReactNode, useEffect, useState } from "react"
+import { createContext, Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react"
 import { countPages, getStoredColumns, setStoredColumns } from "@/lib/utils"
 import { ColumnType, RowType } from "@/types"
 import { filterTasks, sortTasks, getStoredTasks, setStoredTasks } from "@/lib/utils"
@@ -19,6 +19,8 @@ type TaskState = {
     rows: RowType[]
     undoStack: { rows: RowType[], columns: ColumnType[] }[]
     redoStack: { rows: RowType[], columns: ColumnType[] }[]
+    selectedTasks: string[]
+    setSelectedTasks: Dispatch<SetStateAction<string[]>>
     undo: () => void
     redo: () => void
     addNewField: (name: string, type: 'text' | 'number' | 'checkbox') => void
@@ -36,6 +38,8 @@ const initialState: TaskState = {
     rows: [],
     undoStack: [],
     redoStack: [],
+    selectedTasks: [],
+    setSelectedTasks: () => { },
     undo: () => { },
     redo: () => { },
     addNewField: () => { },
@@ -57,6 +61,7 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
     const [currentPage, setCurrentPage] = useState(1)
     const [undoStack, setUndoStack] = useState<{ rows: RowType[], columns: ColumnType[] }[]>([])
     const [redoStack, setRedoStack] = useState<{ rows: RowType[], columns: ColumnType[] }[]>([])
+    const [selectedTasks, setSelectedTasks] = useState<string[]>([]) // Store selected task IDs
 
     const defaultCloumns: ColumnType[] = [
         { name: "title", type: "text" },
@@ -195,7 +200,7 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
     }
 
     return (
-        <TaskContext.Provider value={{ pages, ProtectedFields: initialState.ProtectedFields, columns, rows, undoStack, redoStack, undo, redo, addNewField, removeColumn, editTask, createTask, deleteTask, fetchTasks }}>
+        <TaskContext.Provider value={{ pages, ProtectedFields: initialState.ProtectedFields, columns, rows, undoStack, redoStack, selectedTasks, setSelectedTasks, undo, redo, addNewField, removeColumn, editTask, createTask, deleteTask, fetchTasks }}>
             {children}
         </TaskContext.Provider>
     )

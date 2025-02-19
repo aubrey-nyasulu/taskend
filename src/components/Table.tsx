@@ -28,9 +28,20 @@ function Table() {
             <table className="w-full border-collapse">
                 {/* Table Header */}
                 <thead>
-                    <tr className="border-t text-left text-gray-600 text-sm font-medium">
-                        <th className="px-4 py-3 relative">
-                            <div className="w-full h-4 bg-white absolute left-0 -top-3"></div>
+                    <tr className={clsx(
+                        "border-t text-left text-gray-600 text-sm font-medium",
+                    )} >
+                        <th className="relative flex items-center gap-2  px-0 py-3  h-full place-content-center">
+                            <div className="w-full h-4 bg-white absolute left-0 -top-3">
+                            </div>
+                            <button
+                                disabled={true}
+                                className="w-fit opacity-0"
+                            >
+                                Del
+                            </button>
+
+                            <CheckboxController />
                         </th>
 
                         {
@@ -78,13 +89,15 @@ function Table() {
                             key={index}
                             className="hover:bg-gray-50 cursor-pointer"
                         >
-                            <td className="px-0 py-3  h-full grid place-content-center">
+                            <td className="flex items-center gap-2  px-0 py-3  h-full place-content-center">
                                 <button
                                     onClick={() => deleteTask(row.id)}
                                     className="w-fit"
                                 >
                                     Del
                                 </button>
+
+                                <Checkbox id={`${row.id}`} />
                             </td>
 
                             {
@@ -161,5 +174,42 @@ function Solter({ field }: { field: string }) {
 
     return (
         <button onClick={sortByField}>{order}</button>
+    )
+}
+
+function Checkbox({ id }: { id: string }) {
+    const { setSelectedTasks, selectedTasks } = useContext(TaskContext)
+
+    return (
+        <input
+            type="checkbox"
+            className="pt-2"
+            checked={selectedTasks.includes(id)}
+            onChange={e => {
+                if (e.target.checked) {
+                    setSelectedTasks(prev => [...prev, id])
+                } else {
+                    setSelectedTasks(prev => prev.filter(taskId => taskId !== id))
+                }
+            }}
+        />
+    )
+}
+
+function CheckboxController() {
+    const { setSelectedTasks, rows } = useContext(TaskContext)
+
+    return (
+        <input
+            type="checkbox"
+            className="pt-2"
+            onChange={e => {
+                if (e.target.checked) {
+                    setSelectedTasks(rows.map(({ id }) => id.toString()))
+                } else {
+                    setSelectedTasks([])
+                }
+            }}
+        />
     )
 }
