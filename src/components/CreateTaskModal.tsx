@@ -3,6 +3,7 @@ import { RowType } from "@/types"
 import clsx from "clsx"
 import { useRouter } from "next/navigation"
 import { Dispatch, SetStateAction, useContext, useEffect, useRef } from "react"
+import ModalCloserBackground from "./ModalCloserBackground"
 
 export default function CreateTaskModal({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: Dispatch<SetStateAction<boolean>> }) {
   const { columns, createTask } = useContext(TaskContext)
@@ -43,49 +44,53 @@ export default function CreateTaskModal({ isOpen, setIsOpen }: { isOpen: boolean
   }
 
   return (
-    <form
-      ref={formRef}
-      action={handleSubmit}
-      className={clsx(
-        "w-full bg-white shadow-md dark:bg-stone-900  rounded-t-[32px]  absolute bottom-0 left-[50%] -translate-x-[50%] z-[99] ease-linear duration-200 overflow-hidden flex gap-8 flex-col justify-between ",
-        {
-          "w-full h-[calc(100%_-_32px)] px-8 pt-12 pb-8": isOpen,
-          "w-full h-0 pt-0": !isOpen,
-        }
-      )}
-    >
-      <div>
-        {
-          columns.map(({ name, type }) => (
-            type === 'text' &&
-            <CreateTaskTextField
-              key={name}
-              {...{ name }}
-            />
-          ))
-        }
-      </div>
+    <>
+      <ModalCloserBackground {...{ isOpen, setIsOpen }} />
 
-      <div>
-        {
-          columns.map(({ name, type }) => (
-            type === 'checkbox' &&
-            <CreateTaskCheckBoxField key={name} name={name} />
-          ))
-        }
-      </div>
+      <form
+        ref={formRef}
+        action={handleSubmit}
+        className={clsx(
+          "w-full bg-white shadow-md dark:bg-stone-900  rounded-t-[32px]  absolute bottom-0 left-[50%] -translate-x-[50%] z-[99] ease-linear duration-200 overflow-hidden flex gap-8 flex-col justify-between ",
+          {
+            "w-full h-[calc(100%_-_32px)] px-8 pt-12 pb-8": isOpen,
+            "w-full h-0 pt-0": !isOpen,
+          }
+        )}
+      >
+        <div>
+          {
+            columns.map(({ name, type }) => (
+              type === 'text' &&
+              <CreateTaskTextField
+                key={name}
+                {...{ name }}
+              />
+            ))
+          }
+        </div>
 
-      <div>
-        {
-          columns.map(({ name, type }) => (
-            type === 'button' &&
-            <CreateTaskButtons key={name} name={name} />
-          ))
-        }
-      </div>
+        <div>
+          {
+            columns.map(({ name, type }) => (
+              type === 'checkbox' &&
+              <CreateTaskCheckBoxField key={name} name={name} />
+            ))
+          }
+        </div>
 
-      <button type="submit"></button>
-    </form >
+        <div>
+          {
+            columns.map(({ name, type }) => (
+              type === 'button' &&
+              <CreateTaskButtons key={name} name={name} />
+            ))
+          }
+        </div>
+
+        <button type="submit"></button>
+      </form >
+    </>
   )
 }
 

@@ -1,26 +1,18 @@
 "use client"
 
 import UIContext from '@/context/UIProvider'
-import { useContext } from 'react'
+import { Dispatch, SetStateAction, useContext } from 'react'
 
-export default function ModalCloserBackground() {
-    const { isCreateTaskModalOpen, isFilterOpen, isSortOpen, setIsSortOpen, setIsCreateTaskModalOpen, setIsFilterOpen } = useContext(UIContext)
-
+export default function ModalCloserBackground({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: Dispatch<SetStateAction<boolean>> }) {
     return (
         <>
             {
                 (
-                    isCreateTaskModalOpen ||
-                    isFilterOpen ||
-                    isSortOpen
+                    isOpen
                 ) &&
                 < div
-                    className="absolute inset-0 z-40"
-                    onClick={() => {
-                        setIsCreateTaskModalOpen(false)
-                        setIsFilterOpen(false)
-                        setIsSortOpen(false)
-                    }}
+                    className="fixed inset-0 z-40 bg-black/10"
+                    onClick={() => setIsOpen(false)}
                 ></div >
             }
         </>

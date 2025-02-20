@@ -19,8 +19,6 @@ export default function TasksPage({ searchParams }: TaskPageSearchParams) {
         <div className="w-16 h-16 rounded-full bg-stone-200 float-right mr-4"></div>
       </div>
 
-      <ModalCloserBackground />
-
       <TaskManager searchParams={searchParams} />
     </main>
   )

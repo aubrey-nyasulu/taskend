@@ -14,7 +14,7 @@ import { TaskPageSearchParams } from "@/app/tasks/page"
 import UndoRedo from "./UndoRedo"
 
 export default function TaskManager({ searchParams }: TaskPageSearchParams) {
-    const { setIsCreateTaskModalOpen, isCreateTaskModalOpen } = useContext(UIContext)
+    const { setIsCreateTaskModalOpen, isCreateTaskModalOpen, isViewing, setIsViewing } = useContext(UIContext)
     const { fetchTasks, selectedTasks } = useContext(TaskContext)
 
     const page = Number(searchParams?.page) || 1
@@ -29,8 +29,6 @@ export default function TaskManager({ searchParams }: TaskPageSearchParams) {
 
     return (
         <section className="relative w-full h-[calc(100%_-80px)] px-2 md:px-0">
-            <ModalCloserBackground />
-
             <div className={clsx(
                 "bg-white shadow-sm dark:bg-stone-900 w-full h-full rounded-t-[32px] pt-8 pb-20",
                 {
@@ -41,9 +39,19 @@ export default function TaskManager({ searchParams }: TaskPageSearchParams) {
 
                     <div className="w-full max-w-4xl flex gap-4 items-center justify-between mb-0 border-b">
                         <div className="w-full flex gap-4 items-center ">
-                            <button className="border-b-[3px] border-b-stone-700 h-fit pb-2 px-4 focus:ring-1 focus:ring-stone-700">Table</button>
+                            <button
+                                onClick={() => setIsViewing('table')}
+                                className="border-b-[3px] border-b-stone-700 h-fit pb-2 px-4 focus:ring-1 focus:ring-stone-700"
+                            >
+                                Table
+                            </button>
 
-                            <button className="focus:ring-1 focus:ring-stone-700 pb-1 px-4">Board</button>
+                            <button
+                                onClick={() => setIsViewing('board')}
+                                className="focus:ring-1 focus:ring-stone-700 pb-1 px-4"
+                            >
+                                Board
+                            </button>
                         </div>
 
                         <div className="flex gap-4 items-center pb-1">
@@ -59,19 +67,29 @@ export default function TaskManager({ searchParams }: TaskPageSearchParams) {
                             <SelectedCounter />
 
                             <StatusSelectorBulkEdit />
-                            <PrioritySelector />
+                            <PrioritySelectorBulkEdit />
                             <BulkDeleteButton />
                         </div>
                     }
                 </div>
 
-                <div className="w-full h-full overflow-auto pb-4 px-[10%]">
-                    <div className="w-fit min-w-full flex mb-8">
-                        <Table />
-                    </div>
+                {
+                    isViewing === 'table' &&
+                    <div className="w-full h-full overflow-auto pb-4 px-[10%]">
+                        <div className="w-fit min-w-full flex mb-8">
+                            <Table />
+                        </div>
 
-                    <Pagenation />
-                </div>
+                        <Pagenation />
+                    </div>
+                }
+
+                {
+                    isViewing === 'board' &&
+                    <div className="w-full h-full overflow-auto pb-4 px-[10%]">
+                        <p>kanboard</p>
+                    </div>
+                }
             </div>
 
             <CreateTaskModal {...{ isOpen: isCreateTaskModalOpen, setIsOpen: setIsCreateTaskModalOpen }} />
@@ -119,51 +137,56 @@ function TableSort() {
     }
 
     return (
-        <div className="flex gap-2 items-center relative z-50">
-            <button
-                onClick={() => setIsSortOpen(prevState => !prevState)}
-                className="px-3 py-1 border rounded-md"
-            >
-                sort
-            </button>
+        <>
+            <ModalCloserBackground {...{ isOpen: isSortOpen, setIsOpen: setIsSortOpen }} />
 
-            <div className={clsx(
-                "py-2 px-4 bg-stone-50 shadow-lg border rounded-md absolute top-12 right-0",
-                {
-                    "block": isSortOpen,
-                    "hidden": !isSortOpen
-                }
-            )}>
-                <div className="flex gap-4 items-center mb-4">
-                    <select
-                        name="sortBy"
-                        id="sortBy"
-                        onChange={e => setFilterBy(e.currentTarget.value)}
-                        className="py-2 px-3"
-                    >
-                        <option value='status'>status</option>
-                        <option value='priority'>priority</option>
-                    </select>
-
-                    <select
-                        name="filterOrder"
-                        id="filterOrder"
-                        onChange={e => setFilterOrder(e.target.value as 'a' | 'd')}
-                        className="py-2 px-3"
-                    >
-                        <option value="a">ascending</option>
-                        <option value="d">descending</option>
-                    </select>
-                </div>
+            <div className="flex gap-2 items-center relative z-50">
 
                 <button
-                    onClick={deleteSort}
-                    className="opacity-80 px-2 py-1 border rounded-md bg-red-500 text-white"
+                    onClick={() => setIsSortOpen(prevState => !prevState)}
+                    className="px-3 py-1 border rounded-md"
                 >
-                    Delete sort
+                    sort
                 </button>
+
+                <div className={clsx(
+                    "py-2 px-4 bg-stone-50 shadow-lg border rounded-md absolute top-12 right-0",
+                    {
+                        "block": isSortOpen,
+                        "hidden": !isSortOpen
+                    }
+                )}>
+                    <div className="flex gap-4 items-center mb-4">
+                        <select
+                            name="sortBy"
+                            id="sortBy"
+                            onChange={e => setFilterBy(e.currentTarget.value)}
+                            className="py-2 px-3"
+                        >
+                            <option value='status'>status</option>
+                            <option value='priority'>priority</option>
+                        </select>
+
+                        <select
+                            name="filterOrder"
+                            id="filterOrder"
+                            onChange={e => setFilterOrder(e.target.value as 'a' | 'd')}
+                            className="py-2 px-3"
+                        >
+                            <option value="a">ascending</option>
+                            <option value="d">descending</option>
+                        </select>
+                    </div>
+
+                    <button
+                        onClick={deleteSort}
+                        className="opacity-80 px-2 py-1 border rounded-md bg-red-500 text-white"
+                    >
+                        Delete sort
+                    </button>
+                </div>
             </div>
-        </div>
+        </>
     )
 }
 
@@ -207,55 +230,59 @@ function TableFilter() {
     }
 
     return (
-        <div className="flex gap-2 items-center relative z-50">
-            <button
-                onClick={() => setIsFilterOpen(prevState => !prevState)}
-                className="px-3 py-1 border rounded-md"
-            >
-                Filter
-            </button>
+        <>
+            <ModalCloserBackground {...{ isOpen: isFilterOpen, setIsOpen: setIsFilterOpen }} />
 
-            <div className={clsx(
-                "py-3 px-4 bg-stone-50 shadow-lg border rounded-md absolute top-12 right-0",
-                {
-                    "block": isFilterOpen,
-                    "hidden": !isFilterOpen
-                }
-            )}>
-                <div className="mb-4">
-                    <select
-                        name="filterBy"
-                        id="filterBy"
-                        className="py-2 px-3 mb-4"
-                        onChange={e => {
-                            setFilterConstraint(e.target.value)
-                        }}
-                    >
-                        <option value='contains'>contains</option>
-                        <option value='does not contain'>does not contain</option>
-                        <option value='starts with'>starts with</option>
-                        <option value='ends with'>ends with</option>
-                    </select>
-
-                    <input
-                        type="text"
-                        name="filter"
-                        placeholder="Filter by title"
-                        onChange={(e) => {
-                            debounce(() => setFilterValue(e.target.value))
-                        }}
-                        className="py-2 px-3 max-w-[166px]"
-                    />
-                </div>
-
+            <div className="flex gap-2 items-center relative z-50">
                 <button
-                    onClick={() => deleteFilter()}
-                    className="opacity-80 px-2 py-1 border rounded-md bg-red-500 text-white"
+                    onClick={() => setIsFilterOpen(prevState => !prevState)}
+                    className="px-3 py-1 border rounded-md"
                 >
-                    Remove filter
+                    Filter
                 </button>
+
+                <div className={clsx(
+                    "py-3 px-4 bg-stone-50 shadow-lg border rounded-md absolute top-12 right-0",
+                    {
+                        "block": isFilterOpen,
+                        "hidden": !isFilterOpen
+                    }
+                )}>
+                    <div className="mb-4">
+                        <select
+                            name="filterBy"
+                            id="filterBy"
+                            className="py-2 px-3 mb-4"
+                            onChange={e => {
+                                setFilterConstraint(e.target.value)
+                            }}
+                        >
+                            <option value='contains'>contains</option>
+                            <option value='does not contain'>does not contain</option>
+                            <option value='starts with'>starts with</option>
+                            <option value='ends with'>ends with</option>
+                        </select>
+
+                        <input
+                            type="text"
+                            name="filter"
+                            placeholder="Filter by title"
+                            onChange={(e) => {
+                                debounce(() => setFilterValue(e.target.value))
+                            }}
+                            className="py-2 px-3 max-w-[166px]"
+                        />
+                    </div>
+
+                    <button
+                        onClick={() => deleteFilter()}
+                        className="opacity-80 px-2 py-1 border rounded-md bg-red-500 text-white"
+                    >
+                        Remove filter
+                    </button>
+                </div>
             </div>
-        </div>
+        </>
     )
 }
 
@@ -272,14 +299,6 @@ function SelectedCounter() {
                 </div>
             }
         </>
-    )
-}
-
-function BulkEditButton({ fieldName, value }: { fieldName: string, value: string }) {
-    const { bulkEdit } = useContext(TaskContext)
-
-    return (
-        <button onClick={() => bulkEdit(fieldName, value)}>{fieldName}</button>
     )
 }
 
@@ -314,35 +333,39 @@ function StatusSelectorBulkEdit() {
     }
 
     return (
-        <div className="w-fit">
-            <button
-                onClick={() => setIsOpen(true)}
-                className="px-2 w-full text-start"
-            >status</button>
+        <>
+            <ModalCloserBackground {...{ isOpen, setIsOpen }} />
 
-            {
-                isOpen &&
-                <div className="w-fit rounded-md bg-white absolute top-0 z-40 shadow-lg border ">
-                    <p className="px-4 py-[11px] cursor-default ">status</p>
+            <div className="w-fit">
+                <button
+                    onClick={() => setIsOpen(true)}
+                    className="px-2 w-full text-start"
+                >status</button>
 
-                    <div className="w-fit px-4 py-3 pr-24 border-t">
-                        <button onClick={() => handleSelect('not_started')}>not_started</button>
+                {
+                    isOpen &&
+                    <div className="w-fit rounded-md bg-white absolute top-0 z-40 shadow-lg border ">
+                        <p className="px-4 py-[11px] cursor-default ">status</p>
+
+                        <div className="w-fit px-4 py-3 pr-24 border-t">
+                            <button onClick={() => handleSelect('not_started')}>not_started</button>
+                        </div>
+
+                        <div className="w-fit px-4 py-3 pr-24 border-t">
+                            <button onClick={() => handleSelect('in_progress')}>in_progress</button>
+                        </div>
+
+                        <div className="w-fit px-4 py-3 pr-24 border-t">
+                            <button onClick={() => handleSelect('completed')}>completed</button>
+                        </div>
                     </div>
-
-                    <div className="w-fit px-4 py-3 pr-24 border-t">
-                        <button onClick={() => handleSelect('in_progress')}>in_progress</button>
-                    </div>
-
-                    <div className="w-fit px-4 py-3 pr-24 border-t">
-                        <button onClick={() => handleSelect('completed')}>completed</button>
-                    </div>
-                </div>
-            }
-        </div>
+                }
+            </div>
+        </>
     )
 }
 
-function PrioritySelector() {
+function PrioritySelectorBulkEdit() {
     const { bulkEdit } = useContext(TaskContext)
 
     const [isOpen, setIsOpen] = useState(false)
@@ -365,38 +388,42 @@ function PrioritySelector() {
     }
 
     return (
-        <div className="w-fit">
-            <button
-                onClick={() => setIsOpen(true)}
-                className="px-2 w-full text-start"
-            >priority</button>
+        <>
+            <ModalCloserBackground {...{ isOpen, setIsOpen }} />
 
-            {
-                isOpen &&
-                <div className="w-fit rounded-md bg-white absolute top-0 z-40 shadow-lg border ">
-                    <p className="px-4 py-[11px] cursor-default bg-stone-200">priority</p>
+            <div className="w-fit">
+                <button
+                    onClick={() => setIsOpen(true)}
+                    className="px-2 w-full text-start"
+                >priority</button>
 
-                    <div className="w-fit px-4 py-3 pr-24 border-t">
-                        <button onClick={() => handleSelect('none')}>none</button>
+                {
+                    isOpen &&
+                    <div className="w-fit rounded-md bg-white absolute top-0 z-40 shadow-lg border ">
+                        <p className="px-4 py-[11px] cursor-default bg-stone-200">priority</p>
+
+                        <div className="w-fit px-4 py-3 pr-24 border-t">
+                            <button onClick={() => handleSelect('none')}>none</button>
+                        </div>
+
+                        <div className="w-fit px-4 py-3 pr-24 border-t">
+                            <button onClick={() => handleSelect('low')}>low</button>
+                        </div>
+
+                        <div className="w-fit px-4 py-3 pr-24 border-t">
+                            <button onClick={() => handleSelect('medium')}>medium</button>
+                        </div>
+
+                        <div className="w-fit px-4 py-3 pr-24 border-t">
+                            <button onClick={() => handleSelect('high')}>high</button>
+                        </div>
+
+                        <div className="w-fit px-4 py-3 pr-24 border-t">
+                            <button onClick={() => handleSelect('urgent')}>urgent</button>
+                        </div>
                     </div>
-
-                    <div className="w-fit px-4 py-3 pr-24 border-t">
-                        <button onClick={() => handleSelect('low')}>low</button>
-                    </div>
-
-                    <div className="w-fit px-4 py-3 pr-24 border-t">
-                        <button onClick={() => handleSelect('medium')}>medium</button>
-                    </div>
-
-                    <div className="w-fit px-4 py-3 pr-24 border-t">
-                        <button onClick={() => handleSelect('high')}>high</button>
-                    </div>
-
-                    <div className="w-fit px-4 py-3 pr-24 border-t">
-                        <button onClick={() => handleSelect('urgent')}>urgent</button>
-                    </div>
-                </div>
-            }
-        </div>
+                }
+            </div>
+        </>
     )
 }
