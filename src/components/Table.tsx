@@ -1,6 +1,6 @@
 "use client"
 
-import { useContext, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import clsx from "clsx"
 import AddNewFieldModal from "./AddNewFieldModal"
 import TaskContext from "@/context/TaskProvider"
@@ -105,7 +105,7 @@ function Table() {
                                     <td
                                         key={index + name}
                                         className={clsx(
-                                            "px-4 border",
+                                            "border relative",
                                             {
                                                 "border-l-0": index === 0,
                                             }
@@ -118,7 +118,9 @@ function Table() {
                                                 />
                                                 : type === 'checkbox'
                                                     ? <input type="checkbox" />
-                                                    : <>{row[name]}</>
+                                                    : name === 'status'
+                                                        ? < StatusSelector {...{ value: row[name] as string, id: row.id }} />
+                                                        : <PrioritySelector {...{ value: row[name] as string, id: row.id }} />
                                         }
                                     </td>
                                 ))
@@ -211,5 +213,115 @@ function CheckboxController() {
                 }
             }}
         />
+    )
+}
+
+function StatusSelector({ id, value }: { id: number, value: string }) {
+    const { editTask } = useContext(TaskContext)
+
+    const [isOpen, setIsOpen] = useState(false)
+
+    // Close on Escape Key
+    useEffect(() => {
+        if (!isOpen) return
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") setIsOpen(false)
+        }
+
+        document.addEventListener("keydown", handleKeyDown)
+        return () => document.removeEventListener("keydown", handleKeyDown)
+    }, [isOpen])
+
+    const handleSelect = (value: string) => {
+        setIsOpen(false)
+        editTask(id, 'status', value)
+    }
+
+    return (
+        <div className="min-w-full w-fit">
+            <button
+                onClick={() => setIsOpen(true)}
+                className="px-2 w-full text-start"
+            >{value}</button>
+
+            {
+                isOpen &&
+                <div className="w-fit rounded-md bg-white absolute top-0 z-40 shadow-lg border ">
+                    <p className="px-4 py-[11px] cursor-default bg-stone-200">{value}</p>
+
+                    <div className="w-fit px-4 py-3 pr-24 border-t">
+                        <button onClick={() => handleSelect('not_started')}>not_started</button>
+                    </div>
+
+                    <div className="w-fit px-4 py-3 pr-24 border-t">
+                        <button onClick={() => handleSelect('in_progress')}>in_progress</button>
+                    </div>
+
+                    <div className="w-fit px-4 py-3 pr-24 border-t">
+                        <button onClick={() => handleSelect('completed')}>completed</button>
+                    </div>
+                </div>
+            }
+        </div>
+    )
+}
+
+function PrioritySelector({ id, value }: { id: number, value: string }) {
+    const { editTask } = useContext(TaskContext)
+
+    const [isOpen, setIsOpen] = useState(false)
+
+    // Close on Escape Key
+    useEffect(() => {
+        if (!isOpen) return
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") setIsOpen(false)
+        }
+
+        document.addEventListener("keydown", handleKeyDown)
+        return () => document.removeEventListener("keydown", handleKeyDown)
+    }, [isOpen])
+
+    const handleSelect = (value: string) => {
+        setIsOpen(false)
+        editTask(id, 'priority', value)
+    }
+
+    return (
+        <div className="min-w-full w-fit">
+            <button
+                onClick={() => setIsOpen(true)}
+                className="px-2 w-full text-start"
+            >{value}</button>
+
+            {
+                isOpen &&
+                <div className="w-fit rounded-md bg-white absolute top-0 z-40 shadow-lg border ">
+                    <p className="px-4 py-[11px] cursor-default bg-stone-200">{value}</p>
+
+                    <div className="w-fit px-4 py-3 pr-24 border-t">
+                        <button onClick={() => handleSelect('none')}>none</button>
+                    </div>
+
+                    <div className="w-fit px-4 py-3 pr-24 border-t">
+                        <button onClick={() => handleSelect('low')}>low</button>
+                    </div>
+
+                    <div className="w-fit px-4 py-3 pr-24 border-t">
+                        <button onClick={() => handleSelect('medium')}>medium</button>
+                    </div>
+
+                    <div className="w-fit px-4 py-3 pr-24 border-t">
+                        <button onClick={() => handleSelect('high')}>high</button>
+                    </div>
+
+                    <div className="w-fit px-4 py-3 pr-24 border-t">
+                        <button onClick={() => handleSelect('urgent')}>urgent</button>
+                    </div>
+                </div>
+            }
+        </div>
     )
 }

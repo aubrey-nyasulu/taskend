@@ -55,11 +55,11 @@ export default function TaskManager({ searchParams }: TaskPageSearchParams) {
 
                     {
                         selectedTasks.length > 0 &&
-                        <div className="flex gap-4 items-center   py-3 px-4 ">
+                        <div className="flex gap-4 items-center   py-3 px-4 relative ">
                             <SelectedCounter />
 
-                            <BulkEditButton {...{ fieldName: 'status', value: 'status_value' }} />
-                            <BulkEditButton {...{ fieldName: 'priority', value: 'priority_value' }} />
+                            <StatusSelectorBulkEdit />
+                            <PrioritySelector />
                             <BulkDeleteButton />
                         </div>
                     }
@@ -267,7 +267,7 @@ function SelectedCounter() {
         <>
             {
                 selectedTasks.length > 0 &&
-                <div className="px-2 h-fit w-fit border grid place-content-center rounded-md">
+                <div className="px-2 h-fit w-fit border grid place-content-center rounded-md text-nowrap">
                     {selectedTasks.length} Selected
                 </div>
             }
@@ -288,5 +288,115 @@ function BulkDeleteButton() {
 
     return (
         <button onClick={bulkDelete}>delete</button>
+    )
+}
+
+function StatusSelectorBulkEdit() {
+    const { bulkEdit } = useContext(TaskContext)
+
+    const [isOpen, setIsOpen] = useState(false)
+
+    // Close on Escape Key
+    useEffect(() => {
+        if (!isOpen) return
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") setIsOpen(false)
+        }
+
+        document.addEventListener("keydown", handleKeyDown)
+        return () => document.removeEventListener("keydown", handleKeyDown)
+    }, [isOpen])
+
+    const handleSelect = (value: string) => {
+        setIsOpen(false)
+        bulkEdit('status', value)
+    }
+
+    return (
+        <div className="w-fit">
+            <button
+                onClick={() => setIsOpen(true)}
+                className="px-2 w-full text-start"
+            >status</button>
+
+            {
+                isOpen &&
+                <div className="w-fit rounded-md bg-white absolute top-0 z-40 shadow-lg border ">
+                    <p className="px-4 py-[11px] cursor-default ">status</p>
+
+                    <div className="w-fit px-4 py-3 pr-24 border-t">
+                        <button onClick={() => handleSelect('not_started')}>not_started</button>
+                    </div>
+
+                    <div className="w-fit px-4 py-3 pr-24 border-t">
+                        <button onClick={() => handleSelect('in_progress')}>in_progress</button>
+                    </div>
+
+                    <div className="w-fit px-4 py-3 pr-24 border-t">
+                        <button onClick={() => handleSelect('completed')}>completed</button>
+                    </div>
+                </div>
+            }
+        </div>
+    )
+}
+
+function PrioritySelector() {
+    const { bulkEdit } = useContext(TaskContext)
+
+    const [isOpen, setIsOpen] = useState(false)
+
+    // Close on Escape Key
+    useEffect(() => {
+        if (!isOpen) return
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") setIsOpen(false)
+        }
+
+        document.addEventListener("keydown", handleKeyDown)
+        return () => document.removeEventListener("keydown", handleKeyDown)
+    }, [isOpen])
+
+    const handleSelect = (value: string) => {
+        setIsOpen(false)
+        bulkEdit('priority', value)
+    }
+
+    return (
+        <div className="w-fit">
+            <button
+                onClick={() => setIsOpen(true)}
+                className="px-2 w-full text-start"
+            >priority</button>
+
+            {
+                isOpen &&
+                <div className="w-fit rounded-md bg-white absolute top-0 z-40 shadow-lg border ">
+                    <p className="px-4 py-[11px] cursor-default bg-stone-200">priority</p>
+
+                    <div className="w-fit px-4 py-3 pr-24 border-t">
+                        <button onClick={() => handleSelect('none')}>none</button>
+                    </div>
+
+                    <div className="w-fit px-4 py-3 pr-24 border-t">
+                        <button onClick={() => handleSelect('low')}>low</button>
+                    </div>
+
+                    <div className="w-fit px-4 py-3 pr-24 border-t">
+                        <button onClick={() => handleSelect('medium')}>medium</button>
+                    </div>
+
+                    <div className="w-fit px-4 py-3 pr-24 border-t">
+                        <button onClick={() => handleSelect('high')}>high</button>
+                    </div>
+
+                    <div className="w-fit px-4 py-3 pr-24 border-t">
+                        <button onClick={() => handleSelect('urgent')}>urgent</button>
+                    </div>
+                </div>
+            }
+        </div>
     )
 }
