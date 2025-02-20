@@ -30,7 +30,7 @@ export function sortTasks(tasks: RowType[], sortBy: string, order: 'a' | 'd'): R
 }
 
 export function getStoredColumns(): ColumnType[] {
-    return JSON.parse(localStorage.getItem('columns') || '[]')
+    return JSON.parse(localStorage.getItem('columns') ?? '[]')
 }
 
 export function setStoredColumns(tasks: ColumnType[]): void {

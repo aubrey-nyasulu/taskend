@@ -28,6 +28,8 @@ type TaskState = {
     editTask: (id: number, fieldName: string, value: string) => void
     createTask: (task: RowType) => void
     deleteTask: (taskToDeleteId: number) => void
+    bulkEdit: (fieldName: string, value: string) => void
+    bulkDelete: () => void
     fetchTasks: (params: FetchTasksPropTypes) => void
 }
 
@@ -47,6 +49,8 @@ const initialState: TaskState = {
     editTask: () => { },
     createTask: () => { },
     deleteTask: () => { },
+    bulkEdit: () => { },
+    bulkDelete: () => { },
     fetchTasks: () => { },
 }
 
@@ -102,8 +106,8 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
     const redo = () => {
         if (redoStack.length === 0) return
         setUndoStack(prev => [...prev, { rows: cachedTasks, columns }]) // Save current state before redoing
-        setStoredTasks(redoStack[redoStack.length - 1].rows) // Restore next state
-        setStoredColumns(undoStack[undoStack.length - 1].columns)
+        setStoredTasks(redoStack[redoStack.length - 1]?.rows || []) // Restore next state
+        setStoredColumns(undoStack[undoStack.length - 1]?.columns || defaultCloumns)
         setRedoStack(prev => prev.slice(0, -1)) // Remove last state
 
         fetchTasks({ page: currentPage })
@@ -122,7 +126,6 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
 
     const removeColumn = (columnId: string) => {
         if (initialState.ProtectedFields[columnId]) return
-
         saveState()
 
         const filteredColumns = columns.filter(col => col.name !== columnId)
@@ -178,6 +181,33 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
         fetchTasks({ page: currentPage })
     }
 
+    const bulkEdit = (fieldName: string, value: string) => {
+        saveState()
+
+        const updatedRows = rows.map(task =>
+            selectedTasks.includes(task.id.toString()) ? { ...task, [fieldName]: value } : task
+        )
+        setRows(updatedRows)
+
+        const updatedStorageTasks = cachedTasks.map(task =>
+            selectedTasks.includes(task.id.toString()) ? { ...task, [fieldName]: value } : task
+        )
+
+        setStoredTasks(updatedStorageTasks)
+        setCachedTasks(updatedStorageTasks)
+    }
+
+    const bulkDelete = () => {
+        saveState()
+
+        const tasks = cachedTasks.filter(({ id }) => !selectedTasks.includes(id.toString()))
+        setStoredTasks(tasks)
+
+        setPages(countPages(tasks.length, limit))
+
+        fetchTasks({ page: currentPage })
+    }
+
     const fetchTasks = ({ filterConstraint, page, order, sortBy, filterValue }: FetchTasksPropTypes) => {
         let tasks = getStoredTasks()
         setCachedTasks(tasks)
@@ -200,7 +230,7 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
     }
 
     return (
-        <TaskContext.Provider value={{ pages, ProtectedFields: initialState.ProtectedFields, columns, rows, undoStack, redoStack, selectedTasks, setSelectedTasks, undo, redo, addNewField, removeColumn, editTask, createTask, deleteTask, fetchTasks }}>
+        <TaskContext.Provider value={{ pages, ProtectedFields: initialState.ProtectedFields, columns, rows, undoStack, redoStack, selectedTasks, setSelectedTasks, undo, redo, addNewField, removeColumn, editTask, createTask, deleteTask, bulkEdit, bulkDelete, fetchTasks }}>
             {children}
         </TaskContext.Provider>
     )

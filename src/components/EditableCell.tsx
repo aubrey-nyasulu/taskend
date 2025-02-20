@@ -9,7 +9,6 @@ export default function EditableCell({ id, value, fieldName }: EditableCellPropT
     const { editTask } = useContext(TaskContext)
 
     useEffect(() => {
-        console.log('ed cell', { fieldName, value })
         setInputValue(value || '')
     }, [value])
 

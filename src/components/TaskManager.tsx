@@ -58,9 +58,9 @@ export default function TaskManager({ searchParams }: TaskPageSearchParams) {
                         <div className="flex gap-4 items-center   py-3 px-4 ">
                             <SelectedCounter />
 
-                            <button>status</button>
-                            <button>priority</button>
-                            <button>delete</button>
+                            <BulkEditButton {...{ fieldName: 'status', value: 'status_value' }} />
+                            <BulkEditButton {...{ fieldName: 'priority', value: 'priority_value' }} />
+                            <BulkDeleteButton />
                         </div>
                     }
                 </div>
@@ -272,5 +272,21 @@ function SelectedCounter() {
                 </div>
             }
         </>
+    )
+}
+
+function BulkEditButton({ fieldName, value }: { fieldName: string, value: string }) {
+    const { bulkEdit } = useContext(TaskContext)
+
+    return (
+        <button onClick={() => bulkEdit(fieldName, value)}>{fieldName}</button>
+    )
+}
+
+function BulkDeleteButton() {
+    const { bulkDelete } = useContext(TaskContext)
+
+    return (
+        <button onClick={bulkDelete}>delete</button>
     )
 }
