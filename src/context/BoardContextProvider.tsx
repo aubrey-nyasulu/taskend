@@ -1,8 +1,7 @@
 "use client"
-import { getStoredBoardSnapShot, getStoredTasks, setStoredBoardSnapShot } from "@/lib/utils";
 import { RowType } from "@/types";
-import { createContext, Dispatch, ReactNode, useEffect, useReducer } from "react"
-import { useFormState } from "react-dom";
+import { createContext, Dispatch, ReactNode, useContext, useEffect, useReducer } from "react"
+import TaskContext, { FetchTasksPropTypes } from "./TaskProvider";
 
 type TaskState = {
     columns: BoardState,
@@ -20,24 +19,20 @@ type TaskState = {
             data?: BoardState;
         };
     }>
+    fetchColumns: () => void
 }
 
 const initialState: TaskState = {
     columns: [],
-    dispatch: () => { }
+    dispatch: () => { },
+    fetchColumns: () => { }
 }
 
 const BoardContext = createContext<TaskState>(initialState)
 
 type ColumnType = 'none' | 'low' | 'medium' | 'high' | 'urgent'
 
-type CardType = {
-    id: number
-    title: string
-    status: string
-}
-
-export type BoardState = [ColumnType, CardType[]][]
+export type BoardState = [ColumnType, number[]][]
 
 function reducer(
     state: BoardState,
@@ -59,8 +54,6 @@ function reducer(
 
     switch (type) {
         case 'initialise': {
-            setStoredBoardSnapShot(payload?.data || [])
-
             return payload?.data || []
         }
 
@@ -74,10 +67,6 @@ function reducer(
 
             state[payload.draggedTo.column][1].splice(payload.draggedTo.index, 0, draggedCard)
 
-            console.log({ state })
-
-            setStoredBoardSnapShot(state)
-
             return state
         }
 
@@ -88,23 +77,17 @@ function reducer(
 export const BoardContextProvider = ({ children }: { children: ReactNode }) => {
     const [columns, dispatch] = useReducer(reducer, [])
 
-    useEffect(() => {
-        let columns = getStoredBoardSnapShot()
+    const { rows } = useContext(TaskContext)
 
-        if (columns?.length > 0) {
-            dispatch({ type: "initialise", payload: { data: columns } })
-        } else {
-            const tasks = getStoredTasks()
+    const fetchColumns = () => {
+        console.log({ rows })
+        const columns = transformTasksToState(rows)
 
-            columns = transformTasksToState(tasks)
-
-            dispatch({ type: "initialise", payload: { data: columns } })
-        }
-
-    }, [])
+        dispatch({ type: "initialise", payload: { data: columns } })
+    }
 
     return (
-        <BoardContext.Provider value={{ columns, dispatch }}>
+        <BoardContext.Provider value={{ columns, dispatch, fetchColumns }}>
             {children}
         </BoardContext.Provider>
     )
@@ -114,7 +97,7 @@ export default BoardContext
 
 
 export const transformTasksToState = (tasks: RowType[]): BoardState => {
-    const stateMap: Record<ColumnType, CardType[]> = {
+    const stateMap: Record<ColumnType, number[]> = {
         none: [],
         low: [],
         medium: [],
@@ -122,8 +105,8 @@ export const transformTasksToState = (tasks: RowType[]): BoardState => {
         urgent: []
     }
 
-    tasks.forEach(({ id, title, status, priority }) => {
-        stateMap[priority as ColumnType].push({ id, title, status })
+    tasks.forEach(({ priority }, index) => {
+        stateMap[priority as ColumnType].push(index)
     })
 
     return Object.entries(stateMap) as BoardState

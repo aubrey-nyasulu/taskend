@@ -14,7 +14,6 @@ function Table() {
     const [deleFieldModalIsOpen, setDeleFieldModalIsOpen] = useState(false)
     const [rightClickedField, setRightClickedField] = useState('')
 
-
     const { columns, rows, ProtectedFields, deleteTask } = useContext(TaskContext)
 
     const temp1 = (name: string) => {

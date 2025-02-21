@@ -88,7 +88,11 @@ export default function TaskManager({ searchParams }: TaskPageSearchParams) {
                 {
                     isViewing === 'board' &&
 
-                    <KanbanBoard />
+                    <div className="w-full h-full overflow-auto pb-4 px-[10%]">
+                        <div className="w-fit min-w-full flex mb-8">
+                            <KanbanBoard />
+                        </div>
+                    </div>
                 }
             </div>
 

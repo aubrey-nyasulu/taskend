@@ -4,7 +4,7 @@ import { countPages, getStoredColumns, setStoredColumns } from "@/lib/utils"
 import { ColumnType, RowType } from "@/types"
 import { filterTasks, sortTasks, getStoredTasks, setStoredTasks } from "@/lib/utils"
 
-type FetchTasksPropTypes = {
+export type FetchTasksPropTypes = {
     page: number
     sortBy?: string
     order?: 'a' | 'd'
@@ -17,6 +17,7 @@ type TaskState = {
     ProtectedFields: Record<string, string>
     columns: ColumnType[]
     rows: RowType[]
+    cachedTasks: RowType[]
     undoStack: { rows: RowType[], columns: ColumnType[] }[]
     redoStack: { rows: RowType[], columns: ColumnType[] }[]
     selectedTasks: string[]
@@ -38,6 +39,7 @@ const initialState: TaskState = {
     pages: 0,
     columns: [],
     rows: [],
+    cachedTasks: [],
     undoStack: [],
     redoStack: [],
     selectedTasks: [],
@@ -67,18 +69,8 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
     const [redoStack, setRedoStack] = useState<{ rows: RowType[], columns: ColumnType[] }[]>([])
     const [selectedTasks, setSelectedTasks] = useState<string[]>([]) // Store selected task IDs
 
-    const defaultCloumns: ColumnType[] = [
-        { name: "title", type: "text" },
-        { name: "status", type: "button" },
-        { name: "priority", type: "button" },
-    ]
-
     useEffect(() => {
         const columns = getStoredColumns()
-
-        if (!columns) {
-            setStoredColumns(defaultCloumns)
-        }
     }, [])
 
     const MAX_STACK_SIZE = 10
@@ -107,7 +99,7 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
         if (redoStack.length === 0) return
         setUndoStack(prev => [...prev, { rows: cachedTasks, columns }]) // Save current state before redoing
         setStoredTasks(redoStack[redoStack.length - 1]?.rows || []) // Restore next state
-        setStoredColumns(undoStack[undoStack.length - 1]?.columns || defaultCloumns)
+        setStoredColumns(undoStack[undoStack.length - 1]?.columns)
         setRedoStack(prev => prev.slice(0, -1)) // Remove last state
 
         fetchTasks({ page: currentPage })
@@ -212,8 +204,12 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
         let tasks = getStoredTasks()
         setCachedTasks(tasks)
 
-        if (filterConstraint && filterValue) tasks = filterTasks(tasks, filterValue, filterConstraint)
-        if (sortBy && order) tasks = sortTasks(tasks, sortBy, order)
+        if (filterConstraint && filterValue) {
+            tasks = filterTasks(tasks, filterValue, filterConstraint)
+        }
+        if (sortBy && order) {
+            tasks = sortTasks(tasks, sortBy, order)
+        }
 
         let sliceStartIndex = tasks.length - (limit * page)
         let sliceEndIndex = tasks.length - (limit * (page - 1))
@@ -230,7 +226,7 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
     }
 
     return (
-        <TaskContext.Provider value={{ pages, ProtectedFields: initialState.ProtectedFields, columns, rows, undoStack, redoStack, selectedTasks, setSelectedTasks, undo, redo, addNewField, removeColumn, editTask, createTask, deleteTask, bulkEdit, bulkDelete, fetchTasks }}>
+        <TaskContext.Provider value={{ pages, ProtectedFields: initialState.ProtectedFields, columns, rows, cachedTasks, undoStack, redoStack, selectedTasks, setSelectedTasks, undo, redo, addNewField, removeColumn, editTask, createTask, deleteTask, bulkEdit, bulkDelete, fetchTasks }}>
             {children}
         </TaskContext.Provider>
     )

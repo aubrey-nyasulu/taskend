@@ -1,5 +1,6 @@
 import { BoardState } from "@/context/BoardContextProvider"
 import { ColumnType, RowType } from "@/types"
+import { tasks } from "./data"
 
 export function filterTasks(tasks: RowType[], filterValue: string, filterConstraint: 'contains' | 'does not contain' | 'starts with' | 'ends with'): RowType[] {
     return tasks.filter(task => {
@@ -31,7 +32,21 @@ export function sortTasks(tasks: RowType[], sortBy: string, order: 'a' | 'd'): R
 }
 
 export function getStoredColumns(): ColumnType[] {
-    return JSON.parse(localStorage.getItem('columns') ?? '[]')
+    const defaultColumns: ColumnType[] = [
+        { name: "title", type: "text" },
+        { name: "status", type: "button" },
+        { name: "priority", type: "button" },
+    ]
+
+    const storedColumns = localStorage.getItem('columns')
+
+    if (!storedColumns) {
+        setStoredColumns(defaultColumns)
+
+        return defaultColumns
+    }
+
+    return JSON.parse(storedColumns)
 }
 
 export function setStoredColumns(tasks: ColumnType[]): void {
@@ -39,19 +54,19 @@ export function setStoredColumns(tasks: ColumnType[]): void {
 }
 
 export function getStoredTasks(): RowType[] {
-    return JSON.parse(localStorage.getItem('tasks') || '[]')
+    const storedTasks = localStorage.getItem('tasks')
+
+    if (!storedTasks) {
+        setStoredTasks(tasks)
+
+        return tasks
+    }
+
+    return JSON.parse(storedTasks)
 }
 
 export function setStoredTasks(tasks: RowType[]): void {
     localStorage.setItem('tasks', JSON.stringify(tasks))
-}
-
-export function getStoredBoardSnapShot(): BoardState {
-    return JSON.parse(localStorage.getItem('board') || '[]')
-}
-
-export function setStoredBoardSnapShot(tasks: BoardState): void {
-    localStorage.setItem('board', JSON.stringify(tasks))
 }
 
 export const debounce = (() => {
