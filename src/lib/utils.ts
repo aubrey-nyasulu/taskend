@@ -1,3 +1,4 @@
+import { BoardState } from "@/context/BoardContextProvider"
 import { ColumnType, RowType } from "@/types"
 
 export function filterTasks(tasks: RowType[], filterValue: string, filterConstraint: 'contains' | 'does not contain' | 'starts with' | 'ends with'): RowType[] {
@@ -43,6 +44,14 @@ export function getStoredTasks(): RowType[] {
 
 export function setStoredTasks(tasks: RowType[]): void {
     localStorage.setItem('tasks', JSON.stringify(tasks))
+}
+
+export function getStoredBoardSnapShot(): BoardState {
+    return JSON.parse(localStorage.getItem('board') || '[]')
+}
+
+export function setStoredBoardSnapShot(tasks: BoardState): void {
+    localStorage.setItem('board', JSON.stringify(tasks))
 }
 
 export const debounce = (() => {

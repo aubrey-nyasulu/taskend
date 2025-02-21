@@ -7,6 +7,7 @@ import { UIContextProvider } from "@/context/UIProvider";
 import AddNewFieldModal from "@/components/AddNewFieldModal";
 import { TaskContextProvider } from "@/context/TaskProvider";
 import CreateTaskButton from "@/components/CreateTaskButton";
+import { BoardContextProvider } from "@/context/BoardContextProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,20 +26,22 @@ export default function RootLayout({
       <body className={`${inter.className} text-stone-950 dark:text-stone-300 flex gap-4`}>
         <TaskContextProvider>
           <UIContextProvider>
-            <header className="w-[340px] h-svh fixed left-0 top-0 hidden md:block">
-              <nav className="h-full flex flex-col justify-between">
-                <Link href={'/tasks'}>taks</Link>
+            <BoardContextProvider>
 
-                <TemporaryButton />
-              </nav>
-            </header>
+              <header className="w-[340px] h-svh fixed left-0 top-0 hidden md:block">
+                <nav className="h-full flex flex-col justify-between">
+                  <Link href={'/tasks'}>taks</Link>
 
-            <div className="w-[340px] h-svh hidden md:block"></div>
+                  <TemporaryButton />
+                </nav>
+              </header>
 
-            {children}
+              <div className="w-[340px] h-svh hidden md:block"></div>
 
-            <CreateTaskButton />
-            {/* <AddNewFieldModal /> */}
+              {children}
+
+              <CreateTaskButton />
+            </BoardContextProvider>
           </UIContextProvider>
         </TaskContextProvider>
       </body>

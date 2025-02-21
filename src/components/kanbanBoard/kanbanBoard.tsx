@@ -1,107 +1,53 @@
+import BoardContext from "@/context/BoardContextProvider"
 import clsx from "clsx"
-import { Dispatch, SetStateAction, useEffect, useReducer, useRef, useState } from "react"
-
-type ColumnType = 'statusNone' | 'low'
-
-type CardType = {
-    id: number
-    title: string
-    status: string
-}
-
-type StateType = {
-    statusNone: CardType[],
-    low: CardType[]
-}
-
-const initialState: StateType = {
-    statusNone: [
-        { id: 1, title: 'some title', status: 'completed' },
-        { id: 2, title: 'another title', status: 'not_started' },
-    ],
-    low: [
-        { id: 3, title: 'some other title', status: 'in_progress' },
-        { id: 4, title: 'another some title', status: 'completed' },
-    ],
-}
-
-function reducer(
-    state: StateType,
-    action: {
-        type: string,
-        payload: {
-            draggingFrom: {
-                index: number,
-                column: ColumnType,
-            },
-            draggedTo: {
-                index: number,
-                column: ColumnType
-            }
-        }
-    }) {
-    const { type, payload } = action
-
-    switch (type) {
-        case 'update': {
-            console.log('in', { payload })
-            const draggedCard = state[payload.draggingFrom.column][payload.draggingFrom.index]
-            console.log({ draggedCard })
-
-            state[payload.draggingFrom.column].splice(payload.draggingFrom.index, 1)
-
-            state[payload.draggedTo.column].splice(payload.draggedTo.index, 0, draggedCard)
-
-            console.log({ state })
-
-            return state
-        }
-
-        default: return state
-    }
-}
+import { Dispatch, SetStateAction, useContext, useEffect, useRef, useState } from "react"
 
 export default function KanbanBoard() {
-    const [columns, dispatch] = useReducer(reducer, initialState)
+    const { columns, dispatch } = useContext(BoardContext)
 
-    const [draggingFrom, setDraggingFrom] = useState<{ index: number, column: ColumnType }>()
-    const [draggedTo, setDraggedTo] = useState<{ index: number, column: ColumnType }>()
+    const [draggingFrom, setDraggingFrom] = useState<{ index: number, column: number }>()
+    const [draggedTo, setDraggedTo] = useState<{ index: number, column: number }>()
     const [dragFinished, setDragFinished] = useState(false)
 
     useEffect(() => {
         if (!dragFinished) return
+        setDragFinished(false)
 
-        console.log({ draggingFrom, draggedTo })
         if (draggedTo && draggingFrom) {
+
+            if (JSON.stringify(draggingFrom) === JSON.stringify(draggedTo)) return console.log('returned')
 
             setDraggedTo(undefined)
 
             dispatch({ type: 'update', payload: { draggingFrom, draggedTo } })
         }
 
-        setDragFinished(false)
     }, [dragFinished])
 
     return (
         <div className="w-full h-fit overflow-auto pb-8 px-[10%] mt-4">
-            <div className="w-[1300px] h-fit pb-8 grid gap-x-4 grid-cols-5">
-                <div className="bg-stone-50 rounded-md p-2 h-fit">
-                    <p className="w-fit bg-stone-200 px-3 rounded-full mb-4">none</p>
+            <div className="w-[1500px] h-fit pb-8 grid gap-x-4 grid-cols-5">
+                {
+                    columns.map(([columnName, tasks], columnIndex) => (
+                        <div key={columnIndex} className="bg-stone-50 rounded-md p-2 h-fit">
+                            <p className="w-fit bg-stone-200 px-3 rounded-full mb-4">{columnName}</p>
 
-                    {
-                        columns.statusNone.map(({ id, status, title }, index) => (
-                            <div
-                                key={id}
-                            >
-                                <DraggableCard {...{ status, title, index, column: 'statusNone', setDragFinished, setDraggingFrom, setDraggedTo }} />
-                            </div>
-                        ))
-                    }
+                            {
+                                tasks.map(({ id, status, title }, taskIndex) => (
+                                    <div
+                                        key={id}
+                                    >
+                                        <DraggableCard {...{ status, title, index: taskIndex, column: columnIndex, setDragFinished, setDraggingFrom, setDraggedTo }} />
+                                    </div>
+                                ))
+                            }
 
-                    <KanBanAddTaskButton {...{ column: 'statusNone', index: columns.statusNone.length, setDragFinished, setDraggedTo }} />
-                </div>
+                            <KanBanAddTaskButton {...{ column: columnIndex, index: tasks.length, setDragFinished, setDraggedTo }} />
+                        </div>
+                    ))
+                }
 
-                <div className="bg-stone-50 rounded-md p-2 h-fit">
+                {/* <div className="bg-stone-50 rounded-md p-2 h-fit">
                     <p className="w-fit bg-stone-200 px-3 rounded-full mb-4">low</p>
 
                     {
@@ -115,7 +61,7 @@ export default function KanbanBoard() {
                     }
 
                     <KanBanAddTaskButton {...{ column: 'low', index: columns.low.length, setDragFinished, setDraggedTo }} />
-                </div>
+                </div> */}
 
                 {/* <div className="bg-stone-50 rounded-md p-2 h-fit">
                     <p className="w-fit bg-stone-200 px-3 rounded-full mb-4">medium</p>
@@ -143,9 +89,9 @@ type DraggableCardPropTypes = {
     title: string
     status: string
     index: number
-    column: ColumnType
-    setDraggingFrom: Dispatch<SetStateAction<{ index: number, column: ColumnType } | undefined>>
-    setDraggedTo: Dispatch<SetStateAction<{ index: number, column: ColumnType } | undefined>>
+    column: number
+    setDraggingFrom: Dispatch<SetStateAction<{ index: number, column: number } | undefined>>
+    setDraggedTo: Dispatch<SetStateAction<{ index: number, column: number } | undefined>>
     setDragFinished: Dispatch<SetStateAction<boolean>>
 }
 
@@ -216,8 +162,8 @@ function DraggableCard({ title, status, index, column, setDraggedTo, setDragging
                 draggable={true}
                 className="w-full px-4 py-2 rounded-md border bg-white flex gap-1 flex-col items-start"
             >
-                <h2 className="font-semibold text-lg">{title}</h2>
-                <p>{status}</p>
+                <h2 className="text-start text-lg mb-2">{title}</h2>
+                <small>{status}</small>
             </button>
         </>
     )
@@ -225,8 +171,8 @@ function DraggableCard({ title, status, index, column, setDraggedTo, setDragging
 
 type KanBanAddTaskButtonPropTypes = {
     index: number
-    column: ColumnType
-    setDraggedTo: Dispatch<SetStateAction<{ index: number, column: ColumnType } | undefined>>
+    column: number
+    setDraggedTo: Dispatch<SetStateAction<{ index: number, column: number } | undefined>>
     setDragFinished: Dispatch<SetStateAction<boolean>>
 }
 
