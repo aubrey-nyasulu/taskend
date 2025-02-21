@@ -11,8 +11,6 @@ type UiState = {
     setIsSortOpen: Dispatch<SetStateAction<boolean>>
     isViewing: 'table' | 'board',
     setIsViewing: Dispatch<SetStateAction<'table' | 'board'>>
-    isBackgroundModalOpen: boolean,
-    setIsBackgroundModalOpen: Dispatch<SetStateAction<boolean>>
 }
 
 const initialState: UiState = {
@@ -24,19 +22,15 @@ const initialState: UiState = {
     setIsSortOpen: () => { },
     isViewing: 'table',
     setIsViewing: () => { },
-    isBackgroundModalOpen: false,
-    setIsBackgroundModalOpen: () => { },
 }
 
 const UIContext = createContext<UiState>(initialState)
 
 export const UIContextProvider = ({ children }: { children: ReactNode }) => {
     const [isViewing, setIsViewing] = useState<'table' | 'board'>('table')
-    const [isAddNewFieldModalOpen, setIsAddNewFieldModalOpen] = useState(false)
     const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState(false)
     const [isSortOpen, setIsSortOpen] = useState(false)
     const [isFilterOpen, setIsFilterOpen] = useState(false)
-    const [isBackgroundModalOpen, setIsBackgroundModalOpen] = useState(false)
 
     return (
         <UIContext.Provider value={{
@@ -48,8 +42,6 @@ export const UIContextProvider = ({ children }: { children: ReactNode }) => {
             setIsSortOpen,
             isViewing,
             setIsViewing,
-            isBackgroundModalOpen,
-            setIsBackgroundModalOpen,
         }}>
             {children}
         </UIContext.Provider>

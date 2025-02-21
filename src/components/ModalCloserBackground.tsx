@@ -1,6 +1,5 @@
 "use client"
 
-import UIContext from '@/context/UIProvider'
 import { Dispatch, SetStateAction, useContext } from 'react'
 
 export default function ModalCloserBackground({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: Dispatch<SetStateAction<boolean>> }) {

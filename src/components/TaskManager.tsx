@@ -12,6 +12,7 @@ import ModalCloserBackground from "./ModalCloserBackground"
 import { debounce } from "@/lib/utils"
 import { TaskPageSearchParams } from "@/app/tasks/page"
 import UndoRedo from "./UndoRedo"
+import KanbanBoard from "./kanbanBoard/kanbanBoard"
 
 export default function TaskManager({ searchParams }: TaskPageSearchParams) {
     const { setIsCreateTaskModalOpen, isCreateTaskModalOpen, isViewing, setIsViewing } = useContext(UIContext)
@@ -86,9 +87,8 @@ export default function TaskManager({ searchParams }: TaskPageSearchParams) {
 
                 {
                     isViewing === 'board' &&
-                    <div className="w-full h-full overflow-auto pb-4 px-[10%]">
-                        <p>kanboard</p>
-                    </div>
+
+                    <KanbanBoard />
                 }
             </div>
 
