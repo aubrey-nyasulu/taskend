@@ -1,8 +1,12 @@
+import { SortIcon, SortingIcon } from "@/assets/svgAssets"
+import UIContext from "@/context/UIProvider"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useContext, useState } from "react"
 
 export default function Solt({ field }: { field: string }) {
     const [order, setOrder] = useState('a')
+
+    const { currentSortField, setCurrentSortField } = useContext(UIContext)
 
     const router = useRouter()
 
@@ -20,11 +24,27 @@ export default function Solt({ field }: { field: string }) {
         searchParams.set('order', order)
 
         router.push(`/?${searchParams}`)
+        setCurrentSortField(field)
 
         setOrder(order)
     }
 
     return (
-        <button onClick={sortByField}>{order}</button>
+        <button onClick={sortByField}>
+            {
+                currentSortField !== field &&
+                <SortIcon />
+            }
+
+            {
+                (currentSortField === field && order === 'a') &&
+                <SortingIcon />
+            }
+
+            {
+                (currentSortField === field && order === 'd') &&
+                <div className="rotate-180"><SortingIcon /></div>
+            }
+        </button>
     )
 }

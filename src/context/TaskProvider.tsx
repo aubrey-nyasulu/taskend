@@ -216,24 +216,25 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
     }
 
     const fetchTasks = ({ filterConstraint, page, order, sortBy, filterValue }: FetchTasksPropTypes) => {
-        let tasks = getStoredTasks()
+        const tasks = getStoredTasks()
 
         setCachedTasks(tasks)
-
-        if (filterConstraint && filterValue) {
-            tasks = filterTasks(tasks, filterValue, filterConstraint)
-        }
-
-        if (sortBy && order) {
-            tasks = sortTasks(tasks, sortBy, order)
-        }
 
         let sliceStartIndex = tasks.length - (limit * page)
         let sliceEndIndex = tasks.length - (limit * (page - 1))
 
         sliceStartIndex = sliceStartIndex >= 0 ? sliceStartIndex : 0
         sliceEndIndex = sliceEndIndex >= 0 ? sliceEndIndex : 0
-        const rows = tasks.slice(sliceStartIndex, sliceEndIndex).reverse()
+        let rows = tasks.slice(sliceStartIndex, sliceEndIndex).reverse()
+
+        if (filterConstraint && filterValue) {
+            rows = filterTasks(rows, filterValue, filterConstraint)
+        }
+
+        if (sortBy && order) {
+            rows = sortTasks(rows, sortBy, order)
+        }
+
         setRows(rows)
 
         const columns = getStoredColumns()

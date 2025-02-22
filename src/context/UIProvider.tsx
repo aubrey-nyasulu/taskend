@@ -15,6 +15,8 @@ type UiState = {
     isViewing: 'table' | 'board',
     setIsViewing: Dispatch<SetStateAction<'table' | 'board'>>
     openCreateTaskModal(task: RowType, isOpen: boolean): void
+    currentSortField: string
+    setCurrentSortField: Dispatch<SetStateAction<string>>
 }
 
 const initialState: UiState = {
@@ -28,6 +30,8 @@ const initialState: UiState = {
     setActiveTask: () => { },
     isViewing: 'table',
     setIsViewing: () => { },
+    currentSortField: '',
+    setCurrentSortField: () => { },
     openCreateTaskModal: () => { },
 }
 
@@ -39,6 +43,7 @@ export const UIContextProvider = ({ children }: { children: ReactNode }) => {
     const [activeTask, setActiveTask] = useState<RowType>()
     const [isSortOpen, setIsSortOpen] = useState(false)
     const [isFilterOpen, setIsFilterOpen] = useState(false)
+    const [currentSortField, setCurrentSortField] = useState('')
 
     function openCreateTaskModal(task: RowType, isOpen: boolean) {
         setIsCreateTaskModalOpen(true)
@@ -58,6 +63,8 @@ export const UIContextProvider = ({ children }: { children: ReactNode }) => {
             isViewing,
             setIsViewing,
             openCreateTaskModal,
+            currentSortField,
+            setCurrentSortField
         }}>
             {children}
         </UIContext.Provider>

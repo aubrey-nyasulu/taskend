@@ -114,7 +114,7 @@ export function TableBoardToggle() {
     const { setIsViewing, isViewing } = useContext(UIContext)
 
     return (
-        <div className="w-fit h flex gap-1 items-center relative bg-stone-200 shadow-md shadow-inner rounded-md p-1 ">
+        <div className="w-fit h flex gap-1 items-center relative bg-stone-100 shadow-inner rounded-md p-1 ">
 
             <button
                 onClick={() => setIsViewing('table')}

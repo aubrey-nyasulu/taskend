@@ -7,7 +7,7 @@ import { useEscape } from "@/customHooks/useEscape"
 import { Sort } from "@/assets/svgAssets"
 
 export default function TableSorter() {
-    const [filterBy, setFilterBy] = useState('status')
+    const [sortBy, setFilterBy] = useState('')
     const [filterOrder, setFilterOrder] = useState<'a' | 'd'>('a')
 
     const { isSortOpen, setIsSortOpen } = useContext(UIContext)
@@ -19,13 +19,13 @@ export default function TableSorter() {
     useEffect(() => {
         const searchParams = new URLSearchParams(location.href.split('?')[1])
 
-        searchParams.set('sort', filterBy)
+        searchParams.set('sort', sortBy)
         searchParams.set('order', filterOrder)
         router.push(`/?${searchParams}`)
 
-        setFilterBy(filterBy)
+        setFilterBy(sortBy)
         setFilterOrder(filterOrder)
-    }, [filterBy, filterOrder])
+    }, [sortBy, filterOrder])
 
     const deleteSort = () => {
         const searchParams = new URLSearchParams(location.href.split('?')[1])
