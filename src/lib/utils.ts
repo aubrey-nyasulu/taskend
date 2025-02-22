@@ -2,7 +2,7 @@ import { BoardState } from "@/context/BoardContextProvider"
 import { ColumnType, RowType } from "@/types"
 import { tasks } from "./data"
 
-export function filterTasks(tasks: RowType[], filterValue: string, filterConstraint: 'contains' | 'does not contain' | 'starts with' | 'ends with'): RowType[] {
+export function filterTasks(tasks: RowType[], filterValue: string, filterConstraint?: 'contains' | 'does not contain' | 'starts with' | 'ends with'): RowType[] {
     return tasks.filter(task => {
         const title = task.title.toLowerCase()
         const query = filterValue.toLowerCase()
@@ -22,7 +22,7 @@ export function filterTasks(tasks: RowType[], filterValue: string, filterConstra
     })
 }
 
-export function sortTasks(tasks: RowType[], sortBy: string, order: 'a' | 'd'): RowType[] {
+export function sortTasks(tasks: RowType[], sortBy: string, order?: 'a' | 'd'): RowType[] {
     return tasks.sort((a, b) => {
         const aValue = a[sortBy]?.toString().toLowerCase() || ''
         const bValue = b[sortBy]?.toString().toLowerCase() || ''

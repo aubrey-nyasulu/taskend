@@ -1,4 +1,5 @@
 "use client"
+
 import { createContext, Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react"
 import { countPages, deepClone, getStoredColumns, setStoredColumns } from "@/lib/utils"
 import { ColumnType, RowType } from "@/types"
@@ -67,7 +68,6 @@ const initialState: TaskState = {
 const TaskContext = createContext<TaskState>(initialState)
 
 export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
-    const limit = 20
     const [cachedTasks, setCachedTasks] = useState<RowType[]>([])
     const [columns, setColumns] = useState<ColumnType[]>([])
     const [rows, setRows] = useState<RowType[]>([])
@@ -77,36 +77,39 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
     const [redoStack, setRedoStack] = useState<{ rows: RowType[], columns: ColumnType[] }[]>([])
     const [selectedTasks, setSelectedTasks] = useState<string[]>([]) // Store selected task IDs
 
+    const limit = 20
     const MAX_STACK_SIZE = 10
+
+    // Save the current state before making a change (for undo/redo)
     const saveState = () => {
         setUndoStack(prev => {
-            const newStack = [...prev, { rows: cachedTasks, columns }]
+            const newStack = [...prev, { rows: deepClone(rows), columns: deepClone(columns) }]
             return newStack.length > MAX_STACK_SIZE ? newStack.slice(1) : newStack
         })
 
-        setRedoStack([]) // Clear redo stack on new changes
+        setRedoStack([]) // Clear redo stack
     }
 
-    // Undo last change
     const undo = () => {
-        if (undoStack.length === 0) return
-        setRedoStack(prev => [...prev, { rows: cachedTasks, columns }]) // Save current state before undoing
-        setStoredTasks(undoStack[undoStack.length - 1].rows) // Restore previous state
-        setStoredColumns(undoStack[undoStack.length - 1].columns)
-        setUndoStack(prev => prev.slice(0, -1)) // Remove last state
+        if (!undoStack.length) return
 
-        fetchTasks({ page: currentPage })
+        const prevState = undoStack[undoStack.length - 1]
+
+        setRedoStack(prev => [...prev, { rows: deepClone(rows), columns: deepClone(columns) }])
+        setRows(prevState.rows)
+        setColumns(prevState.columns)
+        setUndoStack(prev => prev.slice(0, -1))
     }
 
-    // Redo last undone change
     const redo = () => {
-        if (redoStack.length === 0) return
-        setUndoStack(prev => [...prev, { rows: cachedTasks, columns }]) // Save current state before redoing
-        setStoredTasks(redoStack[redoStack.length - 1]?.rows || []) // Restore next state
-        setStoredColumns(undoStack[undoStack.length - 1]?.columns)
-        setRedoStack(prev => prev.slice(0, -1)) // Remove last state
+        if (!redoStack.length) return
 
-        fetchTasks({ page: currentPage })
+        const nextState = redoStack[redoStack.length - 1]
+
+        setUndoStack(prev => [...prev, { rows: deepClone(rows), columns: deepClone(columns) }])
+        setRows(nextState.rows)
+        setColumns(nextState.columns)
+        setRedoStack(prev => prev.slice(0, -1))
     }
 
     const addNewField = (name: string, type: 'text' | 'number' | 'checkbox') => {
@@ -114,20 +117,18 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
 
         const updatedColumns = [...columns, { name, type }]
         setColumns(updatedColumns)
-
         setRows(prevRows => prevRows.map(row => ({ ...row, [name]: "" })))
-
         setStoredColumns(updatedColumns)
     }
 
     const removeColumn = (columnId: string) => {
         if (initialState.ProtectedFields[columnId]) return
+
         saveState()
 
         const filteredColumns = columns.filter(col => col.name !== columnId)
 
         setColumns(filteredColumns)
-
         setRows(prev => prev.map(row => {
             const { [columnId]: _, ...rest } = row
             return rest as RowType
@@ -147,7 +148,6 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
         const updatedStorageTasks = cachedTasks.map(task =>
             task.id === id ? { ...task, [fieldName]: value } : task
         )
-
         setStoredTasks(updatedStorageTasks)
         setCachedTasks(updatedStorageTasks)
     }
@@ -162,7 +162,6 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
 
         tasks.push(task)
         setRows([task, ...rows].slice(0, limit))
-
         setPages(countPages(tasks.length, limit))
 
         setStoredTasks(tasks)

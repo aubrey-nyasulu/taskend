@@ -1,9 +1,7 @@
 import BoardContext from "@/context/BoardContextProvider"
 import TaskContext from "@/context/TaskProvider"
 import UIContext from "@/context/UIProvider"
-import { RowType } from "@/types"
-import clsx from "clsx"
-import { Dispatch, SetStateAction, useContext, useEffect, useRef, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import KanbanColumn from "./components/KanbanColumn"
 
 export default function KanbanBoard() {
