@@ -19,7 +19,7 @@ export default function Solt({ field }: { field: string }) {
         searchParams.set('sort', field)
         searchParams.set('order', order)
 
-        router.push(`/tasks?${searchParams}`)
+        router.push(`/?${searchParams}`)
 
         setOrder(order)
     }

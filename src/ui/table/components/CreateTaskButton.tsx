@@ -9,7 +9,7 @@ export default function CreateTaskButton() {
     return (
         <button
             onClick={() => setIsCreateTaskModalOpen(true)}
-            className="py-4 px-8 bg-stone-800 text-white font-semibold rounded-full fixed bottom-4 right-8 z-50 "
+            className="py-4 px-8 bg-stone-800 text-white font-semibold rounded-full fixed bottom-4 right-8 z-30 "
         >
             Create Task
         </button>

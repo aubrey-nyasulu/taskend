@@ -10,7 +10,7 @@ export default function Pagenation() {
 
         searchParams.set('page', pageNumber)
 
-        return `/tasks?${searchParams}`
+        return `/?${searchParams}`
     }
 
     return (

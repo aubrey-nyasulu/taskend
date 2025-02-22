@@ -1,4 +1,5 @@
 import TaskContext from "@/context/TaskProvider"
+import { useEscape } from "@/customHooks/useEscape"
 import ModalCloserBackground from "@/ui/components/ModalCloserBackground"
 import { useContext, useEffect, useState } from "react"
 
@@ -7,17 +8,7 @@ export default function PrioritySelector({ id, value }: { id: number, value: str
 
     const [isOpen, setIsOpen] = useState(false)
 
-    // Close on Escape Key
-    useEffect(() => {
-        if (!isOpen) return
-
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape") setIsOpen(false)
-        }
-
-        document.addEventListener("keydown", handleKeyDown)
-        return () => document.removeEventListener("keydown", handleKeyDown)
-    }, [isOpen])
+    useEscape(() => setIsOpen(false), isOpen)
 
     const handleSelect = (value: string) => {
         setIsOpen(false)

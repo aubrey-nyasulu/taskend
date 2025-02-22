@@ -5,7 +5,6 @@ import Link from "next/link";
 import TemporaryButton from "@/ui/components/TemporaryButton";
 import { UIContextProvider } from "@/context/UIProvider";
 import { TaskContextProvider } from "@/context/TaskProvider";
-import CreateTaskButton from "@/ui/table/components/CreateTaskButton";
 import { BoardContextProvider } from "@/context/BoardContextProvider";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -38,8 +37,6 @@ export default function RootLayout({
               <div className="w-[340px] h-svh hidden md:block"></div>
 
               {children}
-
-              <CreateTaskButton />
             </BoardContextProvider>
           </UIContextProvider>
         </TaskContextProvider>

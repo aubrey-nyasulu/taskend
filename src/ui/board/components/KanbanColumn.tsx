@@ -16,13 +16,13 @@ type KanbanColumnPropTypes = {
 
 export default function KanbanColumn({ columnName, tasks, columnIndex, rows, openCreateTaskModal, setDraggingFrom, setDraggedTo, setDragFinished }: KanbanColumnPropTypes) {
     return (
-        <div className="bg-stone-50 rounded-md h-fit">
-            <div className="flex gap-4 items-end justify-between mb-2 py-4 border-b px-2">
-                <p className="w-fit bg-stone-200 px-3 rounded-full">
+        <div className="bg-stone-100 rounded-md h-fit">
+            <div className="flex gap-4 items-end justify-between mb-2 py-4 border-b border-b-white px-2">
+                <p className="w-fit bg-gray-400 text-white px-3 rounded-full">
                     {columnName}
                 </p>
 
-                <div className="w-6 h-6 grid place-content-center rounded-full bg-stone-200">
+                <div className="w-6 h-6 grid place-content-center rounded-full bg-gray-400 text-white">
                     {tasks.length}
                 </div>
             </div>
@@ -33,7 +33,14 @@ export default function KanbanColumn({ columnName, tasks, columnIndex, rows, ope
 
                     if (!task) return null
                     return (
-                        <div key={task.id} className="px-2" onClick={() => openCreateTaskModal(task, true)}>
+                        <div
+                            key={task.id}
+                            className="px-2"
+                            onClick={() => {
+                                console.log({ task })
+                                openCreateTaskModal(task, true)
+                            }}
+                        >
                             <DraggableCard
                                 {...{
                                     task,

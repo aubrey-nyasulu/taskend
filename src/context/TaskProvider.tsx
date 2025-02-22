@@ -1,9 +1,10 @@
 "use client"
 
 import { createContext, Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react"
-import { countPages, deepClone, getStoredColumns, setStoredColumns } from "@/lib/utils"
+import { countPages, deepClone, getStoredBoardSnapShot, getStoredColumns, setStoredBoardSnapShot, setStoredColumns } from "@/lib/utils"
 import { ColumnType, RowType } from "@/types"
 import { filterTasks, sortTasks, getStoredTasks, setStoredTasks } from "@/lib/utils"
+import { updateBoard } from "./BoardContextProvider"
 
 export type FetchTasksPropTypes = {
     page: number
@@ -140,9 +141,15 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
     const editTask = (id: number, fieldName: string, value: string) => {
         saveState()
 
-        const updatedRows = rows.map(task =>
-            task.id === id ? { ...task, [fieldName]: value } : task
-        )
+        const updatedRows = rows.map((task, index) => {
+            const targetTask = task.id === id
+
+            if (targetTask) {
+                saveSnapShot(task.priority, index, value)
+            }
+
+            return targetTask ? { ...task, [fieldName]: value } : task
+        })
         setRows(updatedRows)
 
         const updatedStorageTasks = cachedTasks.map(task =>
@@ -163,6 +170,8 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
         tasks.push(task)
         setRows([task, ...rows].slice(0, limit))
         setPages(countPages(tasks.length, limit))
+
+        saveSnapShot(task.priority, tasks.length, task.priority)
 
         setStoredTasks(tasks)
         setCachedTasks(tasks)
@@ -242,3 +251,28 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
 }
 
 export default TaskContext
+
+function saveSnapShot(taskPriority: string, index: number, destinationColumn: string) {
+    const boardSnapShot = getStoredBoardSnapShot()
+
+    if (!boardSnapShot?.length) return
+
+    let draggingFrom: { index: number, column: number } = { column: -1, index: -1 }
+    let draggedTo: { index: number, column: number } = { column: -1, index: 0 }
+
+    draggingFrom.column = ['none', 'low', 'medium', 'high', 'urgent']
+        .findIndex(priority => priority === taskPriority)
+    draggingFrom.index = boardSnapShot[draggingFrom.column][1]
+        .findIndex(taskId => taskId === index)
+    draggedTo.column = boardSnapShot.findIndex(column => column[0] === destinationColumn)
+
+    console.log({ draggingFrom, draggedTo })
+    if (
+        draggingFrom.index > -1 &&
+        draggingFrom.column > -1 &&
+        draggedTo.index > -1 &&
+        draggedTo.column > -1
+    ) {
+        updateBoard({ payload: { draggingFrom, draggedTo }, state: boardSnapShot })
+    }
+}

@@ -1,9 +1,20 @@
-export default function page() {
-    return (
-        <div className="w-[300px] overflow-x-auto bg-green-50 flex flex-nowrap">
-            <div className="w-16 h-4 bg-red-400"></div>
-            <div className="w-[1000px] h-4 bg-yellow-100"></div>
-        </div>
+import TaskManager from "@/ui/TaskManager";
 
-    )
+export type TaskPageSearchParams = {
+  searchParams: {
+    page?: string
+    sort?: string
+    order?: 'a' | 'd'
+    filter?: string
+    filterConstraint?: 'contains' | 'does not contain' | 'starts with' | 'ends with'
+  }
+}
+
+export default function TasksPage({ searchParams }: TaskPageSearchParams) {
+
+  return (
+    <main className="h-screen w-full md:w-[calc(100%_-340px)] flex items-end  md:px-4">
+      <TaskManager searchParams={searchParams} />
+    </main>
+  )
 }

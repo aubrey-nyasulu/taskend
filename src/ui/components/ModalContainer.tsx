@@ -1,19 +1,10 @@
+import { useEscape } from "@/customHooks/useEscape"
 import { ReactNode, useEffect } from "react"
 
 type ModalContainerPropTypes = { isOpen: boolean, onClose: () => void, children: ReactNode }
 
 export default function ModalContainer({ isOpen, onClose, children }: ModalContainerPropTypes) {
-    // Close on Escape Key
-    useEffect(() => {
-        if (!isOpen) return
-
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape") onClose()
-        }
-
-        document.addEventListener("keydown", handleKeyDown)
-        return () => document.removeEventListener("keydown", handleKeyDown)
-    }, [isOpen, onClose])
+    useEscape(onClose, isOpen)
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">

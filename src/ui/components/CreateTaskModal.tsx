@@ -1,28 +1,26 @@
-import TaskContext from "@/context/TaskProvider"
-import { RowType } from "@/types"
-import clsx from "clsx"
+import { useContext, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Dispatch, SetStateAction, useContext, useEffect, useRef } from "react"
-import ModalCloserBackground from "./ModalCloserBackground"
+import clsx from "clsx"
+import TaskContext from "@/context/TaskProvider"
 import UIContext from "@/context/UIProvider"
+import { RowType } from "@/types"
+import ModalCloserBackground from "./ModalCloserBackground"
+import { useEscape } from "@/customHooks/useEscape"
+import BoardContext from "@/context/BoardContextProvider"
 
-export default function CreateTaskModal({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: Dispatch<SetStateAction<boolean>> }) {
-  const { columns, createTask } = useContext(TaskContext)
-  const { activeTask } = useContext(UIContext)
+type CreateTaskModalProps = {
+  isOpen: boolean
+  setIsOpen: (state: boolean) => void
+}
 
-  // Close on Escape Key
-  useEffect(() => {
-    if (!isOpen) return
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setIsOpen(false)
-    }
-
-    document.addEventListener("keydown", handleKeyDown)
-    return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [isOpen, setIsOpen])
-
+export default function CreateTaskModal({ isOpen, setIsOpen }: CreateTaskModalProps) {
+  const { fetchColumns } = useContext(BoardContext)
+  const { columns, createTask, editTask } = useContext(TaskContext)
+  const { activeTask, setActiveTask } = useContext(UIContext)
   const formRef = useRef<HTMLFormElement>(null)
+  const router = useRouter()
+
+  useEscape(() => setIsOpen(false), isOpen)
 
   useEffect(() => {
     if (!isOpen) {
@@ -30,207 +28,125 @@ export default function CreateTaskModal({ isOpen, setIsOpen }: { isOpen: boolean
     }
   }, [isOpen])
 
-  const router = useRouter()
   const handleSubmit = (formData: FormData) => {
-    let data: any = formData.entries()
+    const data = Object.fromEntries(formData.entries()) as RowType
 
-    data = Object.fromEntries(data) as RowType
+    if (activeTask) {
+      if (data.title !== activeTask.title) editTask(activeTask.id, 'title', data.title)
+      if (data.status !== activeTask.status) editTask(activeTask.id, 'status', data.status)
+      if (data.priority !== activeTask.priority) editTask(activeTask.id, 'priority', data.priority)
 
-    createTask(data)
+      fetchColumns()
+    } else {
+      createTask(data)
+    }
 
     formRef.current?.reset()
     setIsOpen(false)
-
-    router.push('/tasks?page=1')
-    // window.location.href = '/tasks?page=1'
+    setActiveTask(undefined)
+    router.push("/?page=1")
   }
 
   return (
     <>
-      <ModalCloserBackground {...{ isOpen, setIsOpen }} />
+      <ModalCloserBackground isOpen={isOpen} setIsOpen={setIsOpen} />
 
       <form
         ref={formRef}
         action={handleSubmit}
         className={clsx(
-          "w-full bg-white shadow-md dark:bg-stone-900  rounded-t-[32px]  absolute bottom-0 left-[50%] -translate-x-[50%] z-[99] ease-linear duration-200 overflow-hidden flex gap-8 flex-col justify-between ",
+          "w-full bg-white shadow-md dark:bg-stone-900 rounded-t-[32px] absolute bottom-0 left-1/2 -translate-x-1/2 z-50 ease-linear duration-200 overflow-hidden flex flex-col gap-8 justify-between",
           {
-            "w-full h-[calc(100%_-_32px)] px-8 pt-12 pb-8": isOpen,
-            "w-full h-0 pt-0": !isOpen,
+            "h-[calc(100%_-_32px)] px-8 pt-12 pb-8": isOpen,
+            "h-0 pt-0": !isOpen,
           }
         )}
       >
-        <div>
-          {
-            columns.map(({ name, type }) => (
-              type === 'text' &&
-              <CreateTaskTextField
-                key={name}
-                {...{ name, defaultValue: activeTask ? activeTask[name] : '' }}
-              />
-            ))
-          }
-        </div>
-
-        <div>
-          {
-            columns.map(({ name, type }) => (
-              type === 'checkbox' &&
-              <CreateTaskCheckBoxField
-                key={name}
-                {...{
-                  name,
-                  checked: activeTask
-                    ? activeTask[name] === activeTask[name]
-                    : false
-                }}
-              />
-            ))
-          }
-        </div>
-
-        <div>
-          {
-            columns.map(({ name, type }) => (
-              type === 'button' &&
-              <CreateTaskButtons
-                key={name}
-                {...{
-                  name,
-                  status: activeTask ? activeTask.status : '',
-                  priority: activeTask ? activeTask.priority : '',
-                }}
-              />
-            ))
-          }
-        </div>
-
+        <FormFields columns={columns} activeTask={activeTask} />
         <button type="submit"></button>
-      </form >
+      </form>
     </>
   )
 }
 
-function CreateTaskTextField({ name, defaultValue }: { name: string, defaultValue: string | number }) {
+function FormFields({ columns, activeTask }: { columns: any[], activeTask: any }) {
   return (
     <>
-      {
-        name === 'title'
-          ? (
-            <h1 className="mb-12">
-              <input
-                type="text"
-                name={name}
-                defaultValue={defaultValue}
-                placeholder="Add Title"
-                className="text-4xl py-4 font-semibold  w-full "
-              />
-            </h1>
-          )
-          : (
-            <p className="mb-12">
-              <input
-                type="text"
-                name={name}
-                placeholder={`Add ${name}`}
-                className="text-lg py-2 w-full "
-              />
-            </p>
-          )
-      }
+      {columns.map(({ name, type }) => {
+        switch (type) {
+          case "text":
+            return <TextField key={name} name={name} defaultValue={activeTask?.[name] || ""} />
+          case "checkbox":
+            return <CheckBoxField key={name} name={name} checked={!!activeTask?.[name]} />
+          case "button":
+            return <ButtonField key={name} name={name} activeTask={activeTask} />
+          default:
+            return null
+        }
+      })}
     </>
   )
 }
 
-function CreateTaskCheckBoxField({ name, checked }: { name: string, checked: boolean }) {
-  return (
-    <>
-      <label
-        htmlFor={name}
-        className="py-2 px-4 bg-stone-200 rounded-full"
-      >
-        <span className="mr-2">
-          {name}
-        </span>
+function TextField({ name, defaultValue }: { name: string, defaultValue: string | number }) {
+  const [value, setValue] = useState<string | number>('')
+  console.log({ defaultValue })
 
-        <input
-          type="checkbox"
-          name={name}
-          id={name}
-          defaultChecked={checked}
-        />
-      </label>
-    </>
+  useEffect(() => {
+    setValue(defaultValue)
+  }, [defaultValue])
+
+  return (
+    <div className="mb-12">
+      <input
+        type="text"
+        name={name}
+        value={value}
+        onChange={e => setValue(e.target.value)}
+        placeholder={`Add ${name}`}
+        className={name === "title" ? "text-4xl py-4 font-semibold w-full" : "text-lg py-2 w-full"}
+      />
+    </div>
   )
 }
 
-function CreateTaskButtons({ name, status, priority }: { name: string, status: string, priority: string }) {
-  console.log('recei', { status, priority })
+function CheckBoxField({ name, checked }: { name: string, checked: boolean }) {
+  return (
+    <label className="py-2 px-4 bg-stone-200 rounded-full flex items-center gap-2">
+      <span>{name}</span>
+      <input type="checkbox" name={name} defaultChecked={checked} />
+    </label>
+  )
+}
+
+function ButtonField({ name, activeTask }: { name: string, activeTask: any }) {
+  if (name === "status") {
+    return (
+      <RadioGroup
+        name="status"
+        options={["not_started", "in_progress", "completed"]} selected={activeTask?.status}
+      />
+    )
+  }
 
   return (
-    <>
-      {
-        name === 'status'
-          ? (
-            <div
-              key={name}
-              className="flex gap-4 items-center mb-4">
-              Status
+    <RadioGroup
+      name="priority"
+      options={["none", "low", "medium", "high", "urgent"]} selected={activeTask?.priority}
+    />
+  )
+}
 
-              {
-                ["not_started", "in_progress", "completed"]
-                  .map(value => (
-                    <label
-                      key={value}
-                      htmlFor={value}
-                      className="py-2 px-4 bg-stone-200 rounded-full"
-                    >
-                      <span className="mr-2">
-                        {value}
-                      </span>
-
-                      <input
-                        type="radio"
-                        name="status"
-                        id={value}
-                        value={value}
-                        defaultChecked={status === value}
-                      />
-                    </label>
-                  ))
-              }
-            </div>
-          )
-
-          : (
-            <div className="flex gap-4 items-center">
-              Priority
-
-              {
-                ["none", "low", "medium", "high", "urgent"]
-                  .map(value => (
-                    <label
-                      key={value}
-                      htmlFor={value}
-                      className="py-2 px-4 bg-stone-200 rounded-full"
-                    >
-                      <span className="mr-2">
-                        {value}
-                      </span>
-
-                      <input
-                        type="radio"
-                        name="priority"
-                        id={value}
-                        value={value}
-                        defaultChecked={priority === value}
-                      />
-                    </label>
-                  ))
-              }
-            </div>
-          )
-      }
-    </>
+function RadioGroup({ name, options, selected }: { name: string, options: string[], selected: string }) {
+  return (
+    <div className="flex gap-4 items-center mb-4">
+      <span className="capitalize">{name}</span>
+      {options.map((value) => (
+        <label key={value} className="py-2 px-4 bg-stone-200 rounded-full flex items-center gap-2">
+          <span>{value}</span>
+          <input type="radio" name={name} value={value} defaultChecked={selected === value} />
+        </label>
+      ))}
+    </div>
   )
 }

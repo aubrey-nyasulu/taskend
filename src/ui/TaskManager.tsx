@@ -2,18 +2,20 @@
 
 import CreateTaskModal from "@/ui/components/CreateTaskModal"
 import Table from "@/ui/table/Table"
-import TaskContext from "@/context/TaskProvider"
+import TaskContext, { TaskContextProvider } from "@/context/TaskProvider"
 import UIContext from "@/context/UIProvider"
 import clsx from "clsx"
 import { useContext, useEffect } from "react"
 import Pagenation from "./components/Pagenation"
-import { TaskPageSearchParams } from "@/app/tasks/page"
+import { TaskPageSearchParams } from "@/app/page"
 import UndoRedo from "./components/UndoRedo"
 import KanbanBoard from "./board/kanbanBoard"
 import TableSorter from "./components/TableSorter"
 import TableFilter from "./components/TableFilter"
 import StatusSelectorBulkEdit from "./components/StatusSelectorBulkEdit"
 import PrioritySelectorBulkEdit from "./components/PrioritySelectorBulkEdit"
+import BoardContext from "@/context/BoardContextProvider"
+import CreateTaskButton from "./table/components/CreateTaskButton"
 
 export default function TaskManager({ searchParams }: TaskPageSearchParams) {
     const { setIsCreateTaskModalOpen, isCreateTaskModalOpen, isViewing } = useContext(UIContext)
@@ -34,7 +36,7 @@ export default function TaskManager({ searchParams }: TaskPageSearchParams) {
             <div className={clsx(
                 "bg-white shadow-sm dark:bg-stone-900 w-full h-full rounded-t-[32px] pt-8 pb-20",
                 {
-                    "opacity-40 scale-95": isCreateTaskModalOpen
+                    "scale-95": isCreateTaskModalOpen
                 }
             )}>
                 <div className="w-full max-w-4xl mx-auto flex flex-col gap-0 items-center mb-0">
@@ -66,6 +68,8 @@ export default function TaskManager({ searchParams }: TaskPageSearchParams) {
                         <div className="w-fit min-w-full flex">
                             <Table />
                         </div>
+
+                        <CreateTaskButton />
                     </div>
                 }
 

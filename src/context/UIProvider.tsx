@@ -10,7 +10,7 @@ type UiState = {
     setIsFilterOpen: Dispatch<SetStateAction<boolean>>
     isSortOpen: boolean
     activeTask: RowType | undefined
-    // setActiveTask: Dispatch<SetStateAction<RowType | undefined>>
+    setActiveTask: Dispatch<SetStateAction<RowType | undefined>>
     setIsSortOpen: Dispatch<SetStateAction<boolean>>
     isViewing: 'table' | 'board',
     setIsViewing: Dispatch<SetStateAction<'table' | 'board'>>
@@ -25,7 +25,7 @@ const initialState: UiState = {
     isSortOpen: false,
     setIsSortOpen: () => { },
     activeTask: undefined,
-    // setActiveTask: () => { },
+    setActiveTask: () => { },
     isViewing: 'table',
     setIsViewing: () => { },
     openCreateTaskModal: () => { },
@@ -54,7 +54,7 @@ export const UIContextProvider = ({ children }: { children: ReactNode }) => {
             isSortOpen,
             setIsSortOpen,
             activeTask,
-            // setActiveTask,
+            setActiveTask,
             isViewing,
             setIsViewing,
             openCreateTaskModal,

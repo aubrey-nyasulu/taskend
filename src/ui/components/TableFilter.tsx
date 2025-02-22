@@ -22,7 +22,7 @@ export default function TableFilter() {
         searchParams.set('page', '1')
         searchParams.set('filter', filterValue)
         searchParams.set('filterConstraint', filterConstraint)
-        router.push(`/tasks?${searchParams}`)
+        router.push(`/?${searchParams}`)
 
     }, [filterValue, filterConstraint])
 
@@ -32,7 +32,7 @@ export default function TableFilter() {
 
         searchParams.delete('filter')
         searchParams.delete('filterConstraint')
-        router.push(`/tasks?${searchParams}`)
+        router.push(`/?${searchParams}`)
     }
 
     return (

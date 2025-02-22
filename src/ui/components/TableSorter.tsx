@@ -20,7 +20,7 @@ export default function TableSorter() {
 
         searchParams.set('sort', filterBy)
         searchParams.set('order', filterOrder)
-        router.push(`/tasks?${searchParams}`)
+        router.push(`/?${searchParams}`)
 
         setFilterBy(filterBy)
         setFilterOrder(filterOrder)
@@ -31,7 +31,7 @@ export default function TableSorter() {
 
         searchParams.delete('sort')
         searchParams.delete('order')
-        router.push(`/tasks?${searchParams}`)
+        router.push(`/?${searchParams}`)
     }
 
     return (

@@ -2,7 +2,9 @@
 
 import { Dispatch, SetStateAction, useContext } from 'react'
 
-export default function ModalCloserBackground({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: Dispatch<SetStateAction<boolean>> }) {
+export default function ModalCloserBackground({ isOpen, setIsOpen }:
+    { isOpen: boolean, setIsOpen: (arg: boolean) => void }
+) {
     return (
         <>
             {

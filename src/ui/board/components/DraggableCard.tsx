@@ -57,7 +57,11 @@ export default function DraggableCard({ task, index, columnIndex, setDraggingFro
     return (
         <>
             <div className={clsx("h-2 w-full", { "bg-blue-300": highlightDrop })}></div>
-            <button ref={cardRef} draggable className="w-full px-4 py-2 rounded-md border bg-white flex gap-1 flex-col items-start">
+
+            <button
+                ref={cardRef}
+                draggable className="w-full px-4 py-2 rounded-md border bg-white flex gap-1 flex-col items-start"
+            >
                 <h2 className="text-start text-lg mb-2">{title}</h2>
                 <small>{status}</small>
             </button>
