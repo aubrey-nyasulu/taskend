@@ -4,6 +4,7 @@ import { useContext, useEffect, useState } from "react"
 import ModalCloserBackground from "./ModalCloserBackground"
 import clsx from "clsx"
 import { useEscape } from "@/customHooks/useEscape"
+import { Sort } from "@/assets/svgAssets"
 
 export default function TableSorter() {
     const [filterBy, setFilterBy] = useState('status')
@@ -38,16 +39,16 @@ export default function TableSorter() {
         <>
             <ModalCloserBackground {...{ isOpen: isSortOpen, setIsOpen: setIsSortOpen }} />
 
-            <div className="flex gap-2 items-center relative z-50">
+            <div className="h-full  flex gap-2 items-center bg-stone-50 shadow-sm border rounded-full relative z-50">
                 <button
                     onClick={() => setIsSortOpen(prevState => !prevState)}
-                    className="px-3 py-1 border rounded-md"
+                    className="px-3 py-1 rounded-md flex items-center gap-1 font-semibold "
                 >
-                    sort
+                    <span className="hidden md:block">Sort</span> <Sort />
                 </button>
 
                 <div className={clsx(
-                    "py-2 px-4 bg-stone-50 shadow-lg border rounded-md absolute top-12 right-0",
+                    "py-2 px-4 bg-stone-50 shadow-lg border rounded-md absolute top-[72px] right-0",
                     {
                         "block": isSortOpen,
                         "hidden": !isSortOpen

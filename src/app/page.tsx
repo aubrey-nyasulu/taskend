@@ -1,4 +1,5 @@
-import TaskManager from "@/ui/TaskManager";
+import SearchSortAndFilter from "@/ui/components/SearchSortAndFilter";
+import TaskManager, { TableBoardToggle } from "@/ui/TaskManager";
 
 export type TaskPageSearchParams = {
   searchParams: {
@@ -13,7 +14,9 @@ export type TaskPageSearchParams = {
 export default function TasksPage({ searchParams }: TaskPageSearchParams) {
 
   return (
-    <main className="h-screen w-full md:w-[calc(100%_-340px)] flex items-end  md:px-4">
+    <main className="h-screen overflow-hidden w-full md:w-[calc(100%_-340px)] flex flex-col items-end justify-between pt-2 md:px-4">
+      <SearchSortAndFilter />
+
       <TaskManager searchParams={searchParams} />
     </main>
   )

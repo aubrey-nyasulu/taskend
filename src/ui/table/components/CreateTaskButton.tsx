@@ -9,9 +9,10 @@ export default function CreateTaskButton() {
     return (
         <button
             onClick={() => setIsCreateTaskModalOpen(true)}
-            className="py-4 px-8 bg-stone-800 text-white font-semibold rounded-full fixed bottom-4 right-8 z-30 "
+            className="w-16 h-16  bg-stone-800 text-white font-semibold rounded-full fixed bottom-4 right-8 z-30 group aspect-square "
         >
-            Create Task
+            <span className='text-4xl font-semibold '>+</span>
+            {/* <span className='hidden group-hover:block'>Create Task</span> */}
         </button>
     )
 }

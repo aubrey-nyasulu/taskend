@@ -34,25 +34,19 @@ export default function TaskManager({ searchParams }: TaskPageSearchParams) {
     return (
         <section className="relative w-full h-[calc(100%_-80px)] px-2 md:px-0">
             <div className={clsx(
-                "bg-white shadow-sm dark:bg-stone-900 w-full h-full rounded-t-[32px] pt-8 pb-20",
+                "bg-white shadow-sm dark:bg-stone-900 w-full h-full rounded-t-[32px] pt-4 md:pt-8 pb-20",
                 {
                     "scale-95": isCreateTaskModalOpen
                 }
             )}>
                 <div className="w-full max-w-4xl mx-auto flex flex-col gap-0 items-center mb-0">
-                    <div className="w-full max-w-4xl flex gap-4 items-center justify-between mb-0 border-b">
+                    <div className="w-full max-w-4xl flex gap-4 items-center justify-center mb-2 ">
                         <TableBoardToggle />
-
-                        <div className="flex gap-4 items-center pb-1">
-                            <UndoRedo />
-                            <TableSorter />
-                            <TableFilter />
-                        </div>
                     </div>
 
                     {
                         selectedTasks.length > 0 &&
-                        <div className="flex gap-4 items-center   py-3 px-4 relative ">
+                        <div className="flex gap-4 items-center py-3 px-4 relative ">
                             <BulkSelectionCounter />
 
                             <StatusSelectorBulkEdit />
@@ -116,21 +110,32 @@ function BulkSelectionCounter() {
     )
 }
 
-function TableBoardToggle() {
-    const { setIsViewing } = useContext(UIContext)
+export function TableBoardToggle() {
+    const { setIsViewing, isViewing } = useContext(UIContext)
 
     return (
-        <div className="w-full flex gap-4 items-center ">
+        <div className="w-fit h flex gap-1 items-center relative bg-stone-200 shadow-md shadow-inner rounded-md p-1 ">
+
             <button
                 onClick={() => setIsViewing('table')}
-                className="border-b-[3px] border-b-stone-700 h-fit pb-2 px-4 focus:ring-1 focus:ring-stone-700"
+                className={clsx(
+                    "h-fit px-4 py-2 rounded-md ",
+                    {
+                        "bg-white shadow-md": isViewing === 'table'
+                    }
+                )}
             >
                 Table
             </button>
 
             <button
                 onClick={() => setIsViewing('board')}
-                className="focus:ring-1 focus:ring-stone-700 pb-1 px-4"
+                className={clsx(
+                    "h-fit px-4 py-2 rounded-md ",
+                    {
+                        "bg-white shadow-md": isViewing === 'board'
+                    }
+                )}
             >
                 Board
             </button>

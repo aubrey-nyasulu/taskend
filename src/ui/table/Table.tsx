@@ -12,6 +12,7 @@ import StatusSelector from "./components/StatusSelector"
 import PrioritySelector from "./components/PrioritySelector"
 import TaskContext from "@/context/TaskProvider"
 import { RowType } from "@/types"
+import { SvgComponent } from "@/assets/svgAssets"
 
 export default function Table() {
     const [isAddFieldModalOpen, setIsAddFieldModalOpen] = useState(false)
@@ -28,14 +29,17 @@ export default function Table() {
     }
 
     return (
-        <div className="relative w-fit max-w-4xl mx-auto rounded-b-lg flex-1">
+        <div className="relative w-fit max-w-4xl mx-auto rounded-b-lg flex-1 pt-2">
             <table className="w-full border-collapse">
                 <thead>
                     <tr className="border-t text-left text-gray-600 text-sm font-medium">
                         <th className="relative flex items-center gap-2 px-0 py-3 h-full place-content-center">
                             <div className="w-full h-4 bg-white absolute left-0 -top-3"></div>
 
-                            <button disabled className="w-fit opacity-0">Del</button>
+                            <button disabled className="w-fit opacity-0">
+                                <SvgComponent />
+                            </button>
+
                             <CheckboxController />
                         </th>
 
@@ -78,14 +82,14 @@ export default function Table() {
                         rows.map((row, rowIndex) => (
                             <tr
                                 key={rowIndex}
-                                className="hover:bg-gray-50 cursor-pointer"
+                                className="hover:bg-gray-50 cursor-pointer group"
                             >
                                 <td className="flex items-center gap-2 px-0 py-3 h-full place-content-center">
                                     <button
                                         onClick={() => deleteTask(row.id)}
-                                        className="w-fit"
+                                        className="w-fit md:opacity-0 md:group-hover:opacity-100 "
                                     >
-                                        Del
+                                        <SvgComponent />
                                     </button>
 
                                     <BulkSelectCheckbox id={`${row.id}`} />

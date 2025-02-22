@@ -37,57 +37,43 @@ export default function TableFilter() {
 
     return (
         <>
-            <ModalCloserBackground {...{ isOpen: isFilterOpen, setIsOpen: setIsFilterOpen }} />
+            {/* <ModalCloserBackground {...{ isOpen: isFilterOpen, setIsOpen: setIsFilterOpen }} /> */}
 
-            <div className="flex gap-2 items-center relative z-50">
-                <button
-                    onClick={() => setIsFilterOpen(prevState => !prevState)}
-                    className="px-3 py-1 border rounded-md"
+            <div className={clsx(
+                "h-full bg-stone-50 shadow-sm border rounded-full overflow-hidden w-fit flex items-center z-30 ",
+            )}>
+                <select
+                    name="filterBy"
+                    id="filterBy"
+                    className="py-2 w-[108px] bg-transparent pl-4 h-full "
+                    onChange={e => {
+                        setFilterConstraint(e.target.value)
+                    }}
                 >
-                    Filter
-                </button>
+                    <option value='contains'>contains</option>
+                    <option value='does not contain'>does not contain</option>
+                    <option value='starts with'>starts with</option>
+                    <option value='ends with'>ends with</option>
+                </select>
 
-                <div className={clsx(
-                    "py-3 px-4 bg-stone-50 shadow-lg border rounded-md absolute top-12 right-0",
-                    {
-                        "block": isFilterOpen,
-                        "hidden": !isFilterOpen
-                    }
-                )}>
-                    <div className="mb-4">
-                        <select
-                            name="filterBy"
-                            id="filterBy"
-                            className="py-2 px-3 mb-4"
-                            onChange={e => {
-                                setFilterConstraint(e.target.value)
-                            }}
-                        >
-                            <option value='contains'>contains</option>
-                            <option value='does not contain'>does not contain</option>
-                            <option value='starts with'>starts with</option>
-                            <option value='ends with'>ends with</option>
-                        </select>
+                <input
+                    type="text"
+                    name="filter"
+                    placeholder="Search"
+                    onChange={(e) => {
+                        debounce(() => setFilterValue(e.target.value))
+                    }}
+                    className="py-4 px-3 h-full bg-transparent max-w-56 "
+                />
 
-                        <input
-                            type="text"
-                            name="filter"
-                            placeholder="Filter by title"
-                            onChange={(e) => {
-                                debounce(() => setFilterValue(e.target.value))
-                            }}
-                            className="py-2 px-3 max-w-[166px]"
-                        />
-                    </div>
-
-                    <button
+                {/* <button
                         onClick={() => deleteFilter()}
                         className="opacity-80 px-2 py-1 border rounded-md bg-red-500 text-white"
                     >
                         Remove filter
-                    </button>
-                </div>
+                    </button> */}
             </div>
+            {/* </div> */}
         </>
     )
 }

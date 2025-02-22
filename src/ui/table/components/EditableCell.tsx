@@ -37,7 +37,7 @@ export default function EditableCell({ id, value, fieldName }: EditableCellPropT
         <form
             onContextMenu={e => e.preventDefault()}
             onSubmit={handleInputChange}
-            className="w-full"
+            className="w-full min-w-[200px]"
         >
             <input
                 ref={inputRef}

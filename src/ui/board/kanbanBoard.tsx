@@ -33,7 +33,7 @@ export default function KanbanBoard() {
     }, [dragFinished])
 
     return (
-        <div className="relative w-fit max-w-4xl mx-auto rounded-b-lg flex-1 pt-8">
+        <div className="relative w-fit max-w-4xl mx-auto rounded-b-lg flex-1 pt-2">
             <div className="w-[1500px] h-fit pb-8 grid gap-x-4 grid-cols-5">
                 {
                     columns.map(([columnName, tasks], columnIndex) => (
