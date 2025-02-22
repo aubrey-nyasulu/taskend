@@ -1,6 +1,6 @@
 "use client"
 import { createContext, Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react"
-import { countPages, getStoredColumns, setStoredColumns } from "@/lib/utils"
+import { countPages, deepClone, getStoredColumns, setStoredColumns } from "@/lib/utils"
 import { ColumnType, RowType } from "@/types"
 import { filterTasks, sortTasks, getStoredTasks, setStoredTasks } from "@/lib/utils"
 
@@ -14,6 +14,7 @@ export type FetchTasksPropTypes = {
 
 type TaskState = {
     pages: number
+    currentPage: number
     ProtectedFields: Record<string, string>
     columns: ColumnType[]
     rows: RowType[]
@@ -22,8 +23,11 @@ type TaskState = {
     redoStack: { rows: RowType[], columns: ColumnType[] }[]
     selectedTasks: string[]
     setSelectedTasks: Dispatch<SetStateAction<string[]>>
+    setCachedTasks: Dispatch<SetStateAction<RowType[]>>
+    setRows: Dispatch<SetStateAction<RowType[]>>
     undo: () => void
     redo: () => void
+    saveState: () => void
     addNewField: (name: string, type: 'text' | 'number' | 'checkbox') => void
     removeColumn: (columnId: string) => void
     editTask: (id: number, fieldName: string, value: string) => void
@@ -37,15 +41,19 @@ type TaskState = {
 const initialState: TaskState = {
     ProtectedFields: { title: "title", status: "status", priority: "priority" },
     pages: 0,
+    currentPage: 1,
     columns: [],
     rows: [],
     cachedTasks: [],
     undoStack: [],
     redoStack: [],
     selectedTasks: [],
+    setRows: () => { },
+    setCachedTasks: () => { },
     setSelectedTasks: () => { },
     undo: () => { },
     redo: () => { },
+    saveState: () => { },
     addNewField: () => { },
     removeColumn: () => { },
     editTask: () => { },
@@ -68,10 +76,6 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
     const [undoStack, setUndoStack] = useState<{ rows: RowType[], columns: ColumnType[] }[]>([])
     const [redoStack, setRedoStack] = useState<{ rows: RowType[], columns: ColumnType[] }[]>([])
     const [selectedTasks, setSelectedTasks] = useState<string[]>([]) // Store selected task IDs
-
-    useEffect(() => {
-        const columns = getStoredColumns()
-    }, [])
 
     const MAX_STACK_SIZE = 10
     const saveState = () => {
@@ -153,6 +157,9 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
 
         const tasks = cachedTasks
         task.id = tasks.length ? tasks[tasks.length - 1].id + 1 : 1
+
+        if (!task.id || !task?.title || !task?.priority || !task?.status) return
+
         tasks.push(task)
         setRows([task, ...rows].slice(0, limit))
 
@@ -202,11 +209,13 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
 
     const fetchTasks = ({ filterConstraint, page, order, sortBy, filterValue }: FetchTasksPropTypes) => {
         let tasks = getStoredTasks()
+
         setCachedTasks(tasks)
 
         if (filterConstraint && filterValue) {
             tasks = filterTasks(tasks, filterValue, filterConstraint)
         }
+
         if (sortBy && order) {
             tasks = sortTasks(tasks, sortBy, order)
         }
@@ -216,7 +225,8 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
 
         sliceStartIndex = sliceStartIndex >= 0 ? sliceStartIndex : 0
         sliceEndIndex = sliceEndIndex >= 0 ? sliceEndIndex : 0
-        setRows(tasks.slice(sliceStartIndex, sliceEndIndex).reverse())
+        const rows = tasks.slice(sliceStartIndex, sliceEndIndex).reverse()
+        setRows(rows)
 
         const columns = getStoredColumns()
         setColumns(columns)
@@ -226,7 +236,7 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
     }
 
     return (
-        <TaskContext.Provider value={{ pages, ProtectedFields: initialState.ProtectedFields, columns, rows, cachedTasks, undoStack, redoStack, selectedTasks, setSelectedTasks, undo, redo, addNewField, removeColumn, editTask, createTask, deleteTask, bulkEdit, bulkDelete, fetchTasks }}>
+        <TaskContext.Provider value={{ pages, currentPage, ProtectedFields: initialState.ProtectedFields, columns, rows, cachedTasks, undoStack, redoStack, selectedTasks, setRows, setCachedTasks, setSelectedTasks, undo, redo, saveState, addNewField, removeColumn, editTask, createTask, deleteTask, bulkEdit, bulkDelete, fetchTasks }}>
             {children}
         </TaskContext.Provider>
     )

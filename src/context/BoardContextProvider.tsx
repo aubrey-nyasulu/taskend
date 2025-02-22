@@ -1,7 +1,8 @@
 "use client"
 import { RowType } from "@/types";
-import { createContext, Dispatch, ReactNode, useContext, useEffect, useReducer } from "react"
+import { createContext, Dispatch, ReactNode, useContext, useEffect, useReducer, useRef } from "react"
 import TaskContext, { FetchTasksPropTypes } from "./TaskProvider";
+import { getStoredBoardSnapShot, setStoredBoardSnapShot, setStoredTasks } from "@/lib/utils";
 
 type TaskState = {
     columns: BoardState,
@@ -25,7 +26,7 @@ type TaskState = {
 const initialState: TaskState = {
     columns: [],
     dispatch: () => { },
-    fetchColumns: () => { }
+    fetchColumns: () => { },
 }
 
 const BoardContext = createContext<TaskState>(initialState)
@@ -67,6 +68,8 @@ function reducer(
 
             state[payload.draggedTo.column][1].splice(payload.draggedTo.index, 0, draggedCard)
 
+            setStoredBoardSnapShot(state)
+
             return state
         }
 
@@ -77,11 +80,30 @@ function reducer(
 export const BoardContextProvider = ({ children }: { children: ReactNode }) => {
     const [columns, dispatch] = useReducer(reducer, [])
 
-    const { rows } = useContext(TaskContext)
+    const { rows, saveState, setRows, cachedTasks, setCachedTasks, currentPage } = useContext(TaskContext)
+
+    const firstTimeLoading = useRef<boolean>(true)
+
+    useEffect(() => {
+        const columns = getStoredBoardSnapShot()
+
+        if (columns.length > 0) {
+            dispatch({ type: 'initialise', payload: { data: columns } })
+        }
+    }, [])
 
     const fetchColumns = () => {
-        console.log({ rows })
-        const columns = transformTasksToState(rows)
+        let columns: BoardState = []
+
+        if (firstTimeLoading.current) {
+            columns = getStoredBoardSnapShot()
+
+            firstTimeLoading.current = false
+        }
+
+        if (!columns.length) {
+            columns = transformTasksToState(rows)
+        }
 
         dispatch({ type: "initialise", payload: { data: columns } })
     }

@@ -1,5 +1,4 @@
-import ModalCloserBackground from "@/components/ModalCloserBackground";
-import TaskManager from "@/components/TaskManager";
+import TaskManager from "@/ui/TaskManager";
 
 export type TaskPageSearchParams = {
   searchParams: {
@@ -14,11 +13,7 @@ export type TaskPageSearchParams = {
 export default function TasksPage({ searchParams }: TaskPageSearchParams) {
 
   return (
-    <main className="h-screen w-full md:w-[calc(100%_-340px)] flex flex-col items-center justify-between gap-10 min-h-screen md:px-4">
-      <div className="w-full h-16 rounded-2xl mt-4">
-        <div className="w-16 h-16 rounded-full bg-stone-200 float-right mr-4"></div>
-      </div>
-
+    <main className="h-screen w-full md:w-[calc(100%_-340px)] flex items-end  md:px-4">
       <TaskManager searchParams={searchParams} />
     </main>
   )

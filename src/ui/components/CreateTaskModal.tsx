@@ -4,9 +4,11 @@ import clsx from "clsx"
 import { useRouter } from "next/navigation"
 import { Dispatch, SetStateAction, useContext, useEffect, useRef } from "react"
 import ModalCloserBackground from "./ModalCloserBackground"
+import UIContext from "@/context/UIProvider"
 
 export default function CreateTaskModal({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: Dispatch<SetStateAction<boolean>> }) {
   const { columns, createTask } = useContext(TaskContext)
+  const { activeTask } = useContext(UIContext)
 
   // Close on Escape Key
   useEffect(() => {
@@ -64,7 +66,7 @@ export default function CreateTaskModal({ isOpen, setIsOpen }: { isOpen: boolean
               type === 'text' &&
               <CreateTaskTextField
                 key={name}
-                {...{ name }}
+                {...{ name, defaultValue: activeTask ? activeTask[name] : '' }}
               />
             ))
           }
@@ -74,7 +76,15 @@ export default function CreateTaskModal({ isOpen, setIsOpen }: { isOpen: boolean
           {
             columns.map(({ name, type }) => (
               type === 'checkbox' &&
-              <CreateTaskCheckBoxField key={name} name={name} />
+              <CreateTaskCheckBoxField
+                key={name}
+                {...{
+                  name,
+                  checked: activeTask
+                    ? activeTask[name] === activeTask[name]
+                    : false
+                }}
+              />
             ))
           }
         </div>
@@ -83,7 +93,14 @@ export default function CreateTaskModal({ isOpen, setIsOpen }: { isOpen: boolean
           {
             columns.map(({ name, type }) => (
               type === 'button' &&
-              <CreateTaskButtons key={name} name={name} />
+              <CreateTaskButtons
+                key={name}
+                {...{
+                  name,
+                  status: activeTask ? activeTask.status : '',
+                  priority: activeTask ? activeTask.priority : '',
+                }}
+              />
             ))
           }
         </div>
@@ -94,7 +111,7 @@ export default function CreateTaskModal({ isOpen, setIsOpen }: { isOpen: boolean
   )
 }
 
-function CreateTaskTextField({ name }: { name: string }) {
+function CreateTaskTextField({ name, defaultValue }: { name: string, defaultValue: string | number }) {
   return (
     <>
       {
@@ -104,6 +121,7 @@ function CreateTaskTextField({ name }: { name: string }) {
               <input
                 type="text"
                 name={name}
+                defaultValue={defaultValue}
                 placeholder="Add Title"
                 className="text-4xl py-4 font-semibold  w-full "
               />
@@ -124,7 +142,7 @@ function CreateTaskTextField({ name }: { name: string }) {
   )
 }
 
-function CreateTaskCheckBoxField({ name }: { name: string }) {
+function CreateTaskCheckBoxField({ name, checked }: { name: string, checked: boolean }) {
   return (
     <>
       <label
@@ -139,13 +157,16 @@ function CreateTaskCheckBoxField({ name }: { name: string }) {
           type="checkbox"
           name={name}
           id={name}
+          defaultChecked={checked}
         />
       </label>
     </>
   )
 }
 
-function CreateTaskButtons({ name }: { name: string }) {
+function CreateTaskButtons({ name, status, priority }: { name: string, status: string, priority: string }) {
+  console.log('recei', { status, priority })
+
   return (
     <>
       {
@@ -157,24 +178,26 @@ function CreateTaskButtons({ name }: { name: string }) {
               Status
 
               {
-                ["not_started", "in_progress", "completed"].map(value =>
-                  <label
-                    key={value}
-                    htmlFor={value}
-                    className="py-2 px-4 bg-stone-200 rounded-full"
-                  >
-                    <span className="mr-2">
-                      {value}
-                    </span>
+                ["not_started", "in_progress", "completed"]
+                  .map(value => (
+                    <label
+                      key={value}
+                      htmlFor={value}
+                      className="py-2 px-4 bg-stone-200 rounded-full"
+                    >
+                      <span className="mr-2">
+                        {value}
+                      </span>
 
-                    <input
-                      type="radio"
-                      name="status"
-                      id={value}
-                      value={value}
-                    />
-                  </label>
-                )
+                      <input
+                        type="radio"
+                        name="status"
+                        id={value}
+                        value={value}
+                        defaultChecked={status === value}
+                      />
+                    </label>
+                  ))
               }
             </div>
           )
@@ -183,69 +206,28 @@ function CreateTaskButtons({ name }: { name: string }) {
             <div className="flex gap-4 items-center">
               Priority
 
-              <label
-                htmlFor="none"
-                className="py-2 px-4 bg-stone-200 rounded-full"
-              >
-                <span className="mr-2">
-                  none
-                </span>
+              {
+                ["none", "low", "medium", "high", "urgent"]
+                  .map(value => (
+                    <label
+                      key={value}
+                      htmlFor={value}
+                      className="py-2 px-4 bg-stone-200 rounded-full"
+                    >
+                      <span className="mr-2">
+                        {value}
+                      </span>
 
-                <input
-                  type="radio"
-                  name="priority"
-                  id="none"
-                  value="none"
-                />
-              </label>
-
-              <label
-                htmlFor="low"
-                className="py-2 px-4 bg-stone-200 rounded-full"
-              >
-                <span className="mr-2">
-                  low
-                </span>
-
-                <input
-                  type="radio"
-                  name="priority"
-                  id="low"
-                  value="low"
-                />
-              </label>
-
-              <label
-                htmlFor="medium"
-                className="py-2 px-4 bg-stone-200 rounded-full"
-              >
-                <span className="mr-2">
-                  medium
-                </span>
-
-                <input
-                  type="radio"
-                  name="priority"
-                  id="medium"
-                  value="medium"
-                />
-              </label>
-
-              <label
-                htmlFor="high"
-                className="py-2 px-4 bg-stone-200 rounded-full"
-              >
-                <span className="mr-2">
-                  high
-                </span>
-
-                <input
-                  type="radio"
-                  name="priority"
-                  id="high"
-                  value="high"
-                />
-              </label>
+                      <input
+                        type="radio"
+                        name="priority"
+                        id={value}
+                        value={value}
+                        defaultChecked={priority === value}
+                      />
+                    </label>
+                  ))
+              }
             </div>
           )
       }

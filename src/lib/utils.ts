@@ -69,6 +69,14 @@ export function setStoredTasks(tasks: RowType[]): void {
     localStorage.setItem('tasks', JSON.stringify(tasks))
 }
 
+export function getStoredBoardSnapShot(): BoardState {
+    return JSON.parse(localStorage.getItem('board') || '[]')
+}
+
+export function setStoredBoardSnapShot(tasks: BoardState): void {
+    localStorage.setItem('board', JSON.stringify(tasks))
+}
+
 export const debounce = (() => {
     let timer: NodeJS.Timeout | undefined
 
@@ -96,4 +104,19 @@ export const duplicateFielNameExists = ({ columns, value }: DuplicateExistsParam
 
 export const countPages = (length: number, limit: number) => {
     return Math.ceil(length / limit)
+}
+
+export const deepClone = <T>(value: T): T => {
+    if (typeof value !== 'object' || value === null) return value
+
+    const copy = Array.isArray(value) ? [] as T : {} as T
+
+    for (const key in value) {
+        if (Object.prototype.hasOwnProperty.call(value, key)) {
+            (copy as any)[key] = deepClone(value[key])
+        }
+    }
+
+
+    return copy
 }

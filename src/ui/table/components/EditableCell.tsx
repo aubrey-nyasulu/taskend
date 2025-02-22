@@ -1,10 +1,17 @@
 import TaskContext from "@/context/TaskProvider"
+import { useEscape } from "@/customHooks/useEscape"
 import { FormEvent, useContext, useEffect, useRef, useState } from "react"
 
 type EditableCellPropTypes = { fieldName: string, value: string, id: number }
 
 export default function EditableCell({ id, value, fieldName }: EditableCellPropTypes) {
     const [inputValue, setInputValue] = useState('')
+    const [isEditing, setIsediting] = useState(false)
+
+    useEscape(() => {
+        inputRef.current?.blur()
+        setIsediting(false)
+    }, true)
 
     const { editTask } = useContext(TaskContext)
 
@@ -30,6 +37,7 @@ export default function EditableCell({ id, value, fieldName }: EditableCellPropT
         <form
             onContextMenu={e => e.preventDefault()}
             onSubmit={handleInputChange}
+            className="w-full"
         >
             <input
                 ref={inputRef}
@@ -38,8 +46,12 @@ export default function EditableCell({ id, value, fieldName }: EditableCellPropT
                 name={`cell-${id}`}
                 id={`cell-${id}`}
                 onChange={e => setInputValue(e.target.value)}
-                onBlur={() => save()}
-                className="focus:bg-stone-100 focus:shadow-md focus:pl-2 focus:rounded-lg focus:scale-110 h-full py-3 cursor-pointer focus:cursor-text"
+                onBlur={() => {
+                    setIsediting(false)
+                    save()
+                }}
+                onFocus={() => setIsediting(true)}
+                className="focus:bg-stone-100 focus:shadow-md focus:pl-2 focus:rounded-lg focus:scale-110 h-full w-full py-3 px-3 cursor-pointer focus:cursor-text"
             />
         </form>
     )

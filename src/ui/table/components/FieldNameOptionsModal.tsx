@@ -1,6 +1,6 @@
 import TaskContext from "@/context/TaskProvider"
-import { ChangeEvent, useContext, useEffect, useRef } from "react"
-import ModalContainer from "./ModalContainer"
+import { useContext, useEffect, useRef } from "react"
+import ModalContainer from "../../components/ModalContainer"
 
 type FieldNameOptionsModalPropTypes = {
     fieldName: string
@@ -38,10 +38,6 @@ export default function FieldNameOptionsModal({ fieldName, isOpen, onClose }: Fi
     }, [isOpen])
 
     if (!isOpen) return null
-
-    const handleFieldDelete = (e: ChangeEvent<HTMLInputElement>) => {
-        console.log('deleting...')
-    }
 
     return (
         <ModalContainer {...{ isOpen, onClose }}>

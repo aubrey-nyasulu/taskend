@@ -2,11 +2,10 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
-import TemporaryButton from "@/components/TemporaryButton";
+import TemporaryButton from "@/ui/components/TemporaryButton";
 import { UIContextProvider } from "@/context/UIProvider";
-import AddNewFieldModal from "@/components/AddNewFieldModal";
 import { TaskContextProvider } from "@/context/TaskProvider";
-import CreateTaskButton from "@/components/CreateTaskButton";
+import CreateTaskButton from "@/ui/table/components/CreateTaskButton";
 import { BoardContextProvider } from "@/context/BoardContextProvider";
 
 const inter = Inter({ subsets: ["latin"] });

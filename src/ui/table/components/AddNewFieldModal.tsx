@@ -5,7 +5,7 @@ import { duplicateFielNameExists } from "@/lib/utils"
 import clsx from "clsx"
 import { ChangeEvent, FormEvent, ReactNode, useContext, useState } from "react"
 import { useEffect, useRef } from "react"
-import ModalContainer from "./ModalContainer"
+import ModalContainer from "../../components/ModalContainer"
 
 type NewFieldModalProps = {
     isOpen: boolean
@@ -21,20 +21,20 @@ export default function AddNewFieldModal({ isOpen, onClose }: NewFieldModalProps
     const modalRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLInputElement>(null)
 
-    // Focus Trap inside Modal
+    // Trap Focus inside Modal
     useEffect(() => {
         if (!isOpen) return
 
         const focusableElements = modalRef.current?.querySelectorAll("input, button")
 
         let lastFocusibleElementIndex = 0
+
         if (focusableElements?.length) {
             if (fieldNameExist) {
                 lastFocusibleElementIndex = focusableElements.length - 2
             } else {
                 lastFocusibleElementIndex = focusableElements.length - 1
             }
-
         }
 
         const firstElement = focusableElements?.[0] as HTMLElement
@@ -44,9 +44,11 @@ export default function AddNewFieldModal({ isOpen, onClose }: NewFieldModalProps
             if (e.key === "Tab") {
                 if (e.shiftKey && document.activeElement === firstElement) {
                     e.preventDefault()
+
                     lastElement.focus()
                 } else if (!e.shiftKey && document.activeElement === lastElement) {
                     e.preventDefault()
+
                     firstElement.focus()
                 }
             }
@@ -59,8 +61,6 @@ export default function AddNewFieldModal({ isOpen, onClose }: NewFieldModalProps
     useEffect(() => {
         if (isOpen) inputRef.current?.focus()
     }, [isOpen])
-
-    if (!isOpen) return null
 
     const handleFieldNameChange = (e: ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value
@@ -75,12 +75,27 @@ export default function AddNewFieldModal({ isOpen, onClose }: NewFieldModalProps
         setFieldNameExist(columnExist)
     }
 
+    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+
+        const formData = new FormData(e.target as HTMLFormElement)
+
+        const name = formData.get('name') as string
+        const type = formData.get('field-type') as 'text' | 'number' | 'checkbox'
+
+        if (name && type) {
+            addNewField(name, type)
+            onClose()
+            setFieldName('')
+        }
+    }
+
+    if (!isOpen) return null
     return (
         <ModalContainer {...{ isOpen, onClose }}>
             <div ref={modalRef} className="relative bg-white p-6 rounded-lg shadow-lg z-50 w-96">
                 <button
                     onClick={(e) => {
-                        console.log(e)
                         setFieldName('')
                         onClose()
                     }}
@@ -88,21 +103,7 @@ export default function AddNewFieldModal({ isOpen, onClose }: NewFieldModalProps
                     X
                 </button>
 
-                <form onSubmit={e => {
-                    e.preventDefault()
-                    console.log('submitting')
-
-                    const formData = new FormData(e.target as HTMLFormElement)
-
-                    const name = formData.get('name') as string
-                    const type = formData.get('field-type') as 'text' | 'number' | 'checkbox'
-
-                    if (name && type) {
-                        addNewField(name, type)
-                        onClose()
-                        setFieldName('')
-                    }
-                }}>
+                <form onSubmit={handleSubmit}>
                     <div className="w-full flex justify-between items-center mb-4">
                         <h2 className="text-lg font-semibold">Add New Field</h2>
                     </div>
