@@ -56,3 +56,10 @@ body {
 body.dark {
   background: var(--dark-mode-bg);
 }
+
+@layer components {
+  .container {
+    @apply w-full md:max-w-[900px] md:w-svw lg:max-w-[1000px] xl:w-[1120px] mx-auto relative;
+    /* max-width: 1536px; */
+  }
+}

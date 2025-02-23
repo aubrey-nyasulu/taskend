@@ -146,7 +146,18 @@ function TableData({ colIndex, name, type, row }: TableDataPropTypes) {
 
             {
                 type === 'checkbox' &&
-                <input type="checkbox" />
+                <input
+                    type="checkbox"
+                    className="w-6 h-6 block mx-auto"
+                />
+            }
+
+            {
+                type === 'number' &&
+                <input
+                    type="number"
+                    className="block mx-auto"
+                />
             }
 
             {

@@ -4,10 +4,11 @@ import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react"
 type KanbanAddTaskButtonPropTypes = {
     index: number
     column: number
+    setCreateTask: Dispatch<SetStateAction<boolean>>
     setDraggedTo: Dispatch<SetStateAction<{ index: number, column: number } | undefined>>
 }
 
-export default function KanbanAddTaskButton({ column, index, setDraggedTo }: KanbanAddTaskButtonPropTypes) {
+export default function KanbanAddTaskButton({ column, index, setDraggedTo, setCreateTask }: KanbanAddTaskButtonPropTypes) {
     const cardRef = useRef<HTMLButtonElement>(null)
     const [highlightDrop, setHighlightDrop] = useState(false)
 
@@ -37,7 +38,11 @@ export default function KanbanAddTaskButton({ column, index, setDraggedTo }: Kan
     return (
         <>
             <div className={clsx("h-2 w-full", { "bg-blue-300": highlightDrop })}></div>
-            <button ref={cardRef} className="w-full px-4 h-12 rounded-md flex gap-1 items-center border hover:bg-stone-200">
+            <button
+                ref={cardRef}
+                onClick={() => setCreateTask(true)}
+                className="w-full px-4 h-12 rounded-md flex gap-1 items-center border hover:bg-stone-200"
+            >
                 <p className="opacity-60">Add Task</p>
             </button>
         </>

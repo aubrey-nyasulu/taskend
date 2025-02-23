@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react"
 import ModalCloserBackground from "./ModalCloserBackground"
 import TaskContext from "@/context/TaskProvider"
 import { useEscape } from "@/customHooks/useEscape"
+import { PriorityIcon } from "@/assets/svgAssets"
 
 export default function PrioritySelectorBulkEdit() {
     const { bulkEdit } = useContext(TaskContext)
@@ -22,8 +23,10 @@ export default function PrioritySelectorBulkEdit() {
             <div className="w-fit">
                 <button
                     onClick={() => setIsOpen(true)}
-                    className="px-2 w-full text-start"
-                >priority</button>
+                    className="px-2 py-1 w-fit flex items-center gap-1 border border-r-0"
+                >
+                    <PriorityIcon /> priority
+                </button>
 
                 {
                     isOpen &&

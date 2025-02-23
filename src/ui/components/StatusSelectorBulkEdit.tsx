@@ -2,6 +2,7 @@ import TaskContext from "@/context/TaskProvider"
 import { useContext, useEffect, useState } from "react"
 import ModalCloserBackground from "./ModalCloserBackground"
 import { useEscape } from "@/customHooks/useEscape"
+import { StatusIcon } from "@/assets/svgAssets"
 
 export default function StatusSelectorBulkEdit() {
     const [isOpen, setIsOpen] = useState(false)
@@ -22,9 +23,9 @@ export default function StatusSelectorBulkEdit() {
             <div className="w-fit">
                 <button
                     onClick={() => setIsOpen(true)}
-                    className="px-2 w-full text-start"
+                    className="px-2 py-1 w-fit flex items-center gap-1 border border-r-0"
                 >
-                    status
+                    <StatusIcon /> status
                 </button>
 
                 {

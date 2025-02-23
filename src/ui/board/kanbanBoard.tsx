@@ -34,7 +34,7 @@ export default function KanbanBoard() {
 
     return (
         <div className="relative w-fit max-w-4xl mx-auto rounded-b-lg flex-1 pt-2">
-            <div className="w-[1500px] h-fit pb-8 grid gap-x-4 grid-cols-5">
+            <div className="w-[1700px] h-fit pb-8 grid gap-x-4 grid-cols-6">
                 {
                     columns.map(([columnName, tasks], columnIndex) => (
                         <KanbanColumn
@@ -48,7 +48,9 @@ export default function KanbanBoard() {
                             setDraggedTo={setDraggedTo}
                             setDragFinished={setDragFinished}
                         />
-                    ))}
+                    ))
+                }
+                <div className=""></div>
             </div>
         </div>
     )

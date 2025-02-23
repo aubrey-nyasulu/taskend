@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
-import Link from "next/link";
-import TemporaryButton from "@/ui/components/TemporaryButton";
+import "@/styles/globals.css";
 import { UIContextProvider } from "@/context/UIProvider";
 import { TaskContextProvider } from "@/context/TaskProvider";
 import { BoardContextProvider } from "@/context/BoardContextProvider";
-import { TableBoardToggle } from "@/ui/TaskManager";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} text-stone-950 dark:text-stone-300 flex justify-center gap-4`}>
+      <body className={`${inter.className} text-stone-700 dark:text-stone-300 flex justify-center gap-4`}>
         <TaskContextProvider>
           <UIContextProvider>
             <BoardContextProvider>

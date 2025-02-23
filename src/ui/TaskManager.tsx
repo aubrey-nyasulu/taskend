@@ -16,6 +16,7 @@ import StatusSelectorBulkEdit from "./components/StatusSelectorBulkEdit"
 import PrioritySelectorBulkEdit from "./components/PrioritySelectorBulkEdit"
 import BoardContext from "@/context/BoardContextProvider"
 import CreateTaskButton from "./table/components/CreateTaskButton"
+import { DeleteIcon } from "@/assets/svgAssets"
 
 export default function TaskManager({ searchParams }: TaskPageSearchParams) {
     const { setIsCreateTaskModalOpen, isCreateTaskModalOpen, isViewing } = useContext(UIContext)
@@ -34,7 +35,7 @@ export default function TaskManager({ searchParams }: TaskPageSearchParams) {
     return (
         <section className="relative w-full h-[calc(100%_-80px)] px-2 md:px-0">
             <div className={clsx(
-                "bg-white shadow-sm dark:bg-stone-900 w-full h-full rounded-t-[32px] pt-4 md:pt-8 pb-20",
+                "bg-white shadow-sm dark:bg-stone-900 w-full h-full rounded-t-[32px] pt-4 md:pt-8 pb-[120px]",
                 {
                     "scale-95": isCreateTaskModalOpen
                 }
@@ -46,7 +47,7 @@ export default function TaskManager({ searchParams }: TaskPageSearchParams) {
 
                     {
                         selectedTasks.length > 0 &&
-                        <div className="flex gap-4 items-center py-3 px-4 relative ">
+                        <div className="flex gap-0 items-center py-3 px-4 relative ">
                             <BulkSelectionCounter />
 
                             <StatusSelectorBulkEdit />
@@ -63,6 +64,7 @@ export default function TaskManager({ searchParams }: TaskPageSearchParams) {
                             <Table />
                         </div>
 
+                        <UndoRedo />
                         <CreateTaskButton />
                     </div>
                 }
@@ -91,7 +93,12 @@ function BulkDeleteButton() {
     const { bulkDelete } = useContext(TaskContext)
 
     return (
-        <button onClick={bulkDelete}>delete</button>
+        <button
+            onClick={bulkDelete}
+            className="px-2 py-1 w-fit flex items-center gap-1 border h-full"
+        >
+            <DeleteIcon />
+        </button>
     )
 }
 
@@ -102,7 +109,9 @@ function BulkSelectionCounter() {
         <>
             {
                 selectedTasks.length > 0 &&
-                <div className="px-2 h-fit w-fit border grid place-content-center rounded-md text-nowrap">
+                <div
+                    className="whitespace-nowrap px-2 py-1 w-fit flex items-center gap-2 border border-r-0"
+                >
                     {selectedTasks.length} Selected
                 </div>
             }

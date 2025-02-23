@@ -165,13 +165,15 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
         const tasks = cachedTasks
         task.id = tasks.length ? tasks[tasks.length - 1].id + 1 : 1
 
+        console.log('pas', { task })
+
         if (!task.id || !task?.title || !task?.priority || !task?.status) return
 
         tasks.push(task)
         setRows([task, ...rows].slice(0, limit))
         setPages(countPages(tasks.length, limit))
 
-        saveSnapShot(task.priority, tasks.length, task.priority)
+        saveSnapShot(task.priority, 19, task.priority)
 
         setStoredTasks(tasks)
         setCachedTasks(tasks)
@@ -256,6 +258,8 @@ export default TaskContext
 function saveSnapShot(taskPriority: string, index: number, destinationColumn: string) {
     const boardSnapShot = getStoredBoardSnapShot()
 
+    console.log({ destinationColumn, boardSnapShot })
+
     if (!boardSnapShot?.length) return
 
     let draggingFrom: { index: number, column: number } = { column: -1, index: -1 }
@@ -267,9 +271,13 @@ function saveSnapShot(taskPriority: string, index: number, destinationColumn: st
         .findIndex(taskId => taskId === index)
     draggedTo.column = boardSnapShot.findIndex(column => column[0] === destinationColumn)
 
+    if (draggingFrom.index === -1) {
+        draggingFrom.index = boardSnapShot[draggingFrom.column][1].length
+        boardSnapShot[draggingFrom.column][1][draggingFrom.index] = index
+    }
+
     console.log({ draggingFrom, draggedTo })
     if (
-        draggingFrom.index > -1 &&
         draggingFrom.column > -1 &&
         draggedTo.index > -1 &&
         draggedTo.column > -1

@@ -7,6 +7,7 @@ import { RowType } from "@/types"
 import ModalCloserBackground from "./ModalCloserBackground"
 import { useEscape } from "@/customHooks/useEscape"
 import BoardContext from "@/context/BoardContextProvider"
+import { ArrowBackIcon } from "@/assets/svgAssets"
 
 type CreateTaskModalProps = {
   isOpen: boolean
@@ -51,20 +52,36 @@ export default function CreateTaskModal({ isOpen, setIsOpen }: CreateTaskModalPr
     <>
       <ModalCloserBackground isOpen={isOpen} setIsOpen={setIsOpen} />
 
-      <form
-        ref={formRef}
-        action={handleSubmit}
-        className={clsx(
-          "w-full bg-white shadow-md dark:bg-stone-900 rounded-t-[32px] absolute bottom-0 left-1/2 -translate-x-1/2 z-50 ease-linear duration-200 overflow-hidden flex flex-col gap-8 justify-between",
-          {
-            "h-[calc(100%_-_32px)] px-8 pt-12 pb-8": isOpen,
-            "h-0 pt-0": !isOpen,
-          }
-        )}
-      >
-        <FormFields columns={columns} activeTask={activeTask} />
-        <button type="submit"></button>
-      </form>
+      <div className={clsx(
+        "w-full bg-white shadow-md dark:bg-stone-900 rounded-t-[32px] absolute bottom-0 left-1/2 -translate-x-1/2 z-50 ease-linear duration-200 overflow-hidden ",
+        {
+          "h-[calc(100%_-_32px)] px-8 pt-20 pb-8": isOpen,
+          "h-0 pt-0": !isOpen,
+        }
+      )}>
+        <button
+          onClick={() => setIsOpen(false)}
+          className="absolute top-6"
+        >
+          <ArrowBackIcon />
+        </button>
+
+        <form
+          ref={formRef}
+          action={handleSubmit}
+          className={clsx("w-full h-full flex flex-col gap-8 justify-between overflow-y-auto")}
+        >
+
+          <FormFields columns={columns} activeTask={activeTask} />
+
+          <button
+            type="submit"
+            className="w-fit h-fit self-end py-4 px-8 bg-[#212121] text-white rounded-full"
+          >
+            {activeTask ? 'Edit Task' : 'Create Task'}
+          </button>
+        </form>
+      </div>
     </>
   )
 }
@@ -139,14 +156,17 @@ function ButtonField({ name, activeTask }: { name: string, activeTask: any }) {
 
 function RadioGroup({ name, options, selected }: { name: string, options: string[], selected: string }) {
   return (
-    <div className="flex gap-4 items-center mb-4">
+    <div className="flex gap-4 flex-col md:flex-row md:items-center mb-4">
       <span className="capitalize">{name}</span>
-      {options.map((value) => (
-        <label key={value} className="py-2 px-4 bg-stone-200 rounded-full flex items-center gap-2">
-          <span>{value}</span>
-          <input type="radio" name={name} value={value} defaultChecked={selected === value} />
-        </label>
-      ))}
+
+      <div className="flex gap-4 items-center mb-4">
+        {options.map((value) => (
+          <label key={value} className="py-2 px-4 bg-stone-200 rounded-full flex items-center gap-2">
+            <span>{value}</span>
+            <input type="radio" name={name} value={value} defaultChecked={selected === value} />
+          </label>
+        ))}
+      </div>
     </div>
   )
 }

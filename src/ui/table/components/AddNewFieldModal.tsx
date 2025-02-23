@@ -119,7 +119,9 @@ export default function AddNewFieldModal({ isOpen, onClose }: NewFieldModalProps
                         className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-stone-500"
                     />
 
-                    <div>
+                    <p className=" mt-4">Field Type</p>
+
+                    <div className="flex items-center gap-2">
                         <input
                             type="radio"
                             value="text"
@@ -132,7 +134,7 @@ export default function AddNewFieldModal({ isOpen, onClose }: NewFieldModalProps
                         <label htmlFor="text">Text</label>
                     </div>
 
-                    <div>
+                    <div className="flex items-center gap-2">
                         <input
                             type="radio"
                             value="number"
@@ -145,7 +147,7 @@ export default function AddNewFieldModal({ isOpen, onClose }: NewFieldModalProps
                         <label htmlFor="number">Number</label>
                     </div>
 
-                    <div>
+                    <div className="flex items-center gap-2">
                         <input
                             type="radio"
                             value="checkbox"
