@@ -78,10 +78,10 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
     const [redoStack, setRedoStack] = useState<{ rows: RowType[], columns: ColumnType[] }[]>([])
     const [selectedTasks, setSelectedTasks] = useState<string[]>([]) // Store selected task IDs
 
-    const limit = 20
-    const MAX_STACK_SIZE = 10
+    const limit = 20 // Maximum number of tasks per page
+    const MAX_STACK_SIZE = 10 // Maximum undo/redo stack size
 
-    // Save the current state before making a change (for undo/redo)
+    // Saves the current state before making a change (for undo/redo)
     const saveState = () => {
         setUndoStack(prev => {
             const newStack = [...prev, { rows: deepClone(rows), columns: deepClone(columns) }]
@@ -91,6 +91,7 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
         setRedoStack([]) // Clear redo stack
     }
 
+    // Reverts the last action by restoring the previous state from undoStack
     const undo = () => {
         if (!undoStack.length) return
 
@@ -102,6 +103,7 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
         setUndoStack(prev => prev.slice(0, -1))
     }
 
+    // Redoes the last undone action by restoring the latest state from redoStack
     const redo = () => {
         if (!redoStack.length) return
 
@@ -113,6 +115,7 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
         setRedoStack(prev => prev.slice(0, -1))
     }
 
+    // Adds a new column/field to the table and updates all tasks
     const addNewField = (name: string, type: 'text' | 'number' | 'checkbox') => {
         saveState()
 
@@ -122,6 +125,7 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
         setStoredColumns(updatedColumns)
     }
 
+    // Removes a column unless it is a protected field(Title, Status and Priority)
     const removeColumn = (columnId: string) => {
         if (initialState.ProtectedFields[columnId]) return
 
@@ -138,12 +142,14 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
         setStoredColumns(filteredColumns)
     }
 
+    // Modifies a task's field value and updates storage
     const editTask = (id: number, fieldName: string, value: string) => {
         saveState()
 
         const updatedRows = rows.map((task, index) => {
             const targetTask = task.id === id
 
+            // saving kanbanboard snapshot 
             if (targetTask) {
                 saveSnapShot(task.priority, index, value)
             }
@@ -159,13 +165,12 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
         setCachedTasks(updatedStorageTasks)
     }
 
+    // Creates a new task and updates storage
     const createTask = (task: RowType) => {
         saveState()
 
         const tasks = cachedTasks
         task.id = tasks.length ? tasks[tasks.length - 1].id + 1 : 1
-
-        console.log('pas', { task })
 
         if (!task.id || !task?.title || !task?.priority || !task?.status) return
 
@@ -179,6 +184,10 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
         setCachedTasks(tasks)
     }
 
+    /**
+ * Deletes a task by its ID and updates the stored tasks.
+ * Also updates pagination and fetches the updated tasks for the current page.
+ */
     const deleteTask = (taskToDeleteId: number) => {
         saveState()
 
@@ -190,6 +199,10 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
         fetchTasks({ page: currentPage })
     }
 
+    /**
+ * Performs a bulk edit on selected tasks by modifying a specific field.
+ * Updates both the rows and stored tasks to reflect the changes.
+ */
     const bulkEdit = (fieldName: string, value: string) => {
         saveState()
 
@@ -206,6 +219,9 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
         setCachedTasks(updatedStorageTasks)
     }
 
+    /**
+ * Deletes multiple selected tasks at once and updates pagination.
+ */
     const bulkDelete = () => {
         saveState()
 
@@ -217,6 +233,9 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
         fetchTasks({ page: currentPage })
     }
 
+    /**
+ * Fetches tasks from storage and applies pagination, filtering, and sorting.
+ */
     const fetchTasks = ({ filterConstraint, page, order, sortBy, filterValue }: FetchTasksPropTypes) => {
         const tasks = getStoredTasks()
 
@@ -255,10 +274,12 @@ export const TaskContextProvider = ({ children }: { children: ReactNode }) => {
 
 export default TaskContext
 
+/**
+ * Captures a snapshot of the board state before a drag-and-drop operation.
+ * Determines the source and destination indexes and updates the board state accordingly.
+ */
 function saveSnapShot(taskPriority: string, index: number, destinationColumn: string) {
     const boardSnapShot = getStoredBoardSnapShot()
-
-    console.log({ destinationColumn, boardSnapShot })
 
     if (!boardSnapShot?.length) return
 
@@ -276,7 +297,6 @@ function saveSnapShot(taskPriority: string, index: number, destinationColumn: st
         boardSnapShot[draggingFrom.column][1][draggingFrom.index] = index
     }
 
-    console.log({ draggingFrom, draggedTo })
     if (
         draggingFrom.column > -1 &&
         draggedTo.index > -1 &&

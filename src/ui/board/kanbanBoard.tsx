@@ -50,6 +50,7 @@ export default function KanbanBoard() {
                         />
                     ))
                 }
+
                 <div className=""></div>
             </div>
         </div>

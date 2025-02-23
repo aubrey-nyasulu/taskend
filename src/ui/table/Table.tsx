@@ -12,7 +12,7 @@ import StatusSelector from "./components/StatusSelector"
 import PrioritySelector from "./components/PrioritySelector"
 import TaskContext from "@/context/TaskProvider"
 import { RowType } from "@/types"
-import { SvgComponent } from "@/assets/svgAssets"
+import { SelectIcon } from "@/assets/svgAssets"
 
 export default function Table() {
     const [isAddFieldModalOpen, setIsAddFieldModalOpen] = useState(false)
@@ -37,7 +37,7 @@ export default function Table() {
                             <div className="w-full h-4 bg-white absolute left-0 -top-3"></div>
 
                             <button disabled className="w-fit opacity-0">
-                                <SvgComponent />
+                                <SelectIcon />
                             </button>
 
                             <CheckboxController />
@@ -89,7 +89,7 @@ export default function Table() {
                                         onClick={() => deleteTask(row.id)}
                                         className="w-fit md:opacity-0 md:group-hover:opacity-100 "
                                     >
-                                        <SvgComponent />
+                                        <SelectIcon />
                                     </button>
 
                                     <BulkSelectCheckbox id={`${row.id}`} />
